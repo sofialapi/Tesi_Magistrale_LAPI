@@ -1,0 +1,32 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments (Virtual environments)
+.venv/
+venv/
+env/
+conda-env/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# DATASET E DATI PESANTI (MAI caricare su Git)
+data/
+checkpts/
+*.pt
+*.pth
+*.h5
+
+# GRAFICI E OUTPUT LOCALI DI TEST
+outputs/
+
+# IDE specifici e OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+*.egg-info/
