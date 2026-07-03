@@ -1,5 +1,4 @@
 #implementazione degli algoritmi di pulizia delle immagini
-#dull razor
 import cv2
 import numpy as np
 from PIL import Image

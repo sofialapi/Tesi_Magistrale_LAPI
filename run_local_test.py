@@ -14,6 +14,8 @@ from src.config import RAW_DATA_DIR, PROCESSED_DATA_DIR, PLOTS_DIR, TARGET_IMAGE
 from src.preprocessing.image_preprocessing import process_image_pipeline
 from src.preprocessing.dataset_manager import load_and_process_metadata
 
+from src.preprocessing.augmentation import DermalImageAugmentor
+
 def generate_comparison_plot(image_name: str):
     """
     Genera e salva un grafico di confronto Prima/Dopo per una specifica immagine.
@@ -52,6 +54,48 @@ def generate_comparison_plot(image_name: str):
     plt.close()
     print(f"Grafico comparativo salvato in: {plot_output_path}")
 
+def generate_augmentation_plot(filename, raw_subdir, processed_subdir):
+    """
+    Genera un grafico comparativo per validare visivamente l'Augmentation e la Sigmoid Correction.
+    """
+    from src.config import PLOTS_DIR
+    import cv2
+    
+    raw_path = os.path.join(raw_subdir, filename)
+    img_bgr = cv2.imread(raw_path)
+    img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+    
+    # Inizializza l'augmentor in modalità training
+    augmentor = DermalImageAugmentor(target_size=(224, 224), is_training=True)
+    
+    # Generiamo due varianti aumentate diverse della stessa immagine di partenza
+    aug_tensor_1 = augmentor(img_rgb)
+    aug_tensor_2 = augmentor(img_rgb)
+    
+    # Riconvertiamo i tensori di PyTorch in array NumPy per Matplotlib [C, H, W] -> [H, W, C]
+    aug_img_1 = aug_tensor_1.permute(1, 2, 0).numpy()
+    aug_img_2 = aug_tensor_2.permute(1, 2, 0).numpy()
+    
+    # Plotting
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    axes[0].imshow(img_rgb)
+    axes[0].set_title("Immagine Originale (Raw)")
+    axes[0].axis('off')
+    
+    axes[1].imshow(aug_img_1)
+    axes[1].set_title("Augmentation Variante A\n(Geom + Foto)")
+    axes[1].axis('off')
+    
+    axes[2].imshow(aug_img_2)
+    axes[2].set_title("Augmentation Variante B\n(Geom + Foto + Sigmoid)")
+    axes[2].axis('off')
+    
+    plt.tight_layout()
+    plot_path = os.path.join(PLOTS_DIR, f"aug_check_{os.path.splitext(filename)[0]}.png")
+    plt.savefig(plot_path, dpi=150)
+    plt.close()
+    print(f"[PLOT] Grafico di controllo dell'Augmentation salvato in: {plot_path}")
+
 if __name__ == "__main__":
     from src.config import RAW_BCN_DIR, PROCESSED_BCN_DIR, RAW_ISIC_DIR, PROCESSED_ISIC_DIR
     
@@ -71,6 +115,8 @@ if __name__ == "__main__":
         RAW_DATA_DIR = RAW_ISIC_DIR
         PROCESSED_DATA_DIR = PROCESSED_ISIC_DIR
         generate_comparison_plot(processed_files[0])
+        # Genera il grafico di controllo per l'Augmentation
+        generate_augmentation_plot(processed_files[0], RAW_ISIC_DIR, PROCESSED_ISIC_DIR)
     
     print("-" * 50)
     print("[3/3] Avvio elaborazione metadati clinici strutturati (ISIC)...")
