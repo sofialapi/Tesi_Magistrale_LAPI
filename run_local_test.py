@@ -12,6 +12,7 @@ import cv2
 import matplotlib.pyplot as plt
 from src.config import RAW_DATA_DIR, PROCESSED_DATA_DIR, PLOTS_DIR, TARGET_IMAGE_SIZE
 from src.preprocessing.image_preprocessing import process_image_pipeline
+from src.preprocessing.dataset_manager import load_and_process_metadata
 
 def generate_comparison_plot(image_name: str):
     """
@@ -52,19 +53,35 @@ def generate_comparison_plot(image_name: str):
     print(f"Grafico comparativo salvato in: {plot_output_path}")
 
 if __name__ == "__main__":
-    print("=== Avvio Pipeline di Test Locale ===")
-    print(f"Directory Raw: {RAW_DATA_DIR}")
-    print(f"Directory Processed: {PROCESSED_DATA_DIR}")
-    print("-" * 40)
-
-    # 1. Esegui la pipeline di elaborazione su tutte le 10 immagini
-    process_image_pipeline(RAW_DATA_DIR, PROCESSED_DATA_DIR, target_size=TARGET_IMAGE_SIZE)
+    from src.config import RAW_BCN_DIR, PROCESSED_BCN_DIR, RAW_ISIC_DIR, PROCESSED_ISIC_DIR
     
-    # 2. Genera un grafico di controllo visivo per la prima immagine elaborata
-    processed_files = [f for f in os.listdir(PROCESSED_DATA_DIR) if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
+    print("=== Avvio Pipeline di Test Locale Multi-Dataset ===")
+    
+    # 1. Pipeline Immagini - Esecuzione su BCN
+    print(f"\n[1/3] Elaborazione immagini BCN...")
+    process_image_pipeline(RAW_BCN_DIR, PROCESSED_BCN_DIR, target_size=TARGET_IMAGE_SIZE)
+    
+    # 2. Pipeline Immagini - Esecuzione su ISIC (Aggiunto!)
+    print(f"\n[2/3] Elaborazione immagini ISIC...")
+    process_image_pipeline(RAW_ISIC_DIR, PROCESSED_ISIC_DIR, target_size=TARGET_IMAGE_SIZE)
+    
+    # Generazione plot di controllo visivo per la prima immagine di ISIC
+    processed_files = [f for f in os.listdir(PROCESSED_ISIC_DIR) if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
     if processed_files:
-        print("-" * 40)
-        print("Generazione dei grafici di controllo visivo...")
+        RAW_DATA_DIR = RAW_ISIC_DIR
+        PROCESSED_DATA_DIR = PROCESSED_ISIC_DIR
         generate_comparison_plot(processed_files[0])
     
-    print("\n=== Test Completato con Successo ===")
+    print("-" * 50)
+    print("[3/3] Avvio elaborazione metadati clinici strutturati (ISIC)...")
+    
+    # 3. Pipeline Tabulare (Punta al CSV di ISIC)
+    try:
+        csv_full_path = os.path.join(RAW_ISIC_DIR, "metadata_sample.csv")
+        X_clinical, y, ids = load_and_process_metadata(csv_full_path)
+        print(f"Matrice delle feature cliniche generata! Forma: {X_clinical.shape}")
+        print(f"Primo paziente codificato (Z-score + One-Hot):\n{X_clinical[0]}")
+    except Exception as e:
+        print(f"[ERRORE TABULARE] Qualcosa è andato storto: {str(e)}")
+        
+    print("\n=== Pipeline Completata con Successo ===")
