@@ -136,7 +136,7 @@ class TabularSMOTEBalancer:
         classes, counts = np.unique(y, return_counts=True)
         min_samples = np.min(counts)
         
-        # Protezione per set di dati ridotti (es. test locali o fold piccoli)
+        # Protezione per set di dati ridotti (es test locali o fold piccoli)
         effective_k = min(self.k_neighbors, max(1, min_samples - 1))
         
         smote = SMOTE(k_neighbors=effective_k, random_state=self.random_state)

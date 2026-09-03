@@ -1,4 +1,5 @@
 #implementazione degli algoritmi di pulizia delle immagini
+#dull razor, standardizzazione e ridimensionamento, pipeline completa
 import cv2
 import numpy as np
 from PIL import Image
@@ -15,11 +16,11 @@ def dull_razor(image_path: str) -> np.ndarray:
     Returns:
         np.ndarray: Immagine pulita in formato OpenCV (BGR).
     """
-    # 1. Carica l'immagine a colori e convertila in scala di grigi
+    # 1. Carica l'immagine a colori e converte in scala di grigi
     img = cv2.imread(image_path)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     
-    # 2. Applica il filtro BlackHat per evidenziare gli elementi scuri e lineari (i peli)
+    # 2. Applica il filtro BlackHat per evidenziare gli elementi scuri e lineari (peli)
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (9, 9))
     blackhat = cv2.morphologyEx(gray, cv2.MORPH_BLACKHAT, kernel)
     
@@ -35,7 +36,7 @@ def standardize_image(img_array: np.ndarray, target_size=(224, 224)) -> np.ndarr
     """
     Ridimensiona l'immagine e applica un filtro Gaussiano leggero per ridurre il rumore.
     """
-    # Ridimensionamento bilineare (ottimale per CNN/ViT)
+    # Ridimensionamento bilineare
     resized = cv2.resize(img_array, target_size, interpolation=cv2.INTER_LINEAR)
     
     # Riduzione del rumore ad alta frequenza
@@ -58,7 +59,7 @@ def process_image_pipeline(input_dir: str, output_dir: str, target_size=(224, 22
     valid_extensions = ('.jpg', '.jpeg', '.png', '.bmp', '.tif', '.tiff')
     image_files = [f for f in os.listdir(input_dir) if f.lower().endswith(valid_extensions)]
 
-    # DIAGNOSTICA: Se la lista è vuota, stampiamo un avviso chiaro per capire cosa c'è nella cartella
+    # DIAGNOSTICA: Se la lista è vuota, stampa avviso per capire cosa c'è nella cartella
     if len(image_files) == 0:
         print(f"\n[ATTENZIONE] Nessun file immagine valido trovato in '{input_dir}'!")
         print(f"Contenuto attuale della cartella: {os.listdir(input_dir)}\n")
@@ -71,10 +72,10 @@ def process_image_pipeline(input_dir: str, output_dir: str, target_size=(224, 22
         output_path = os.path.join(output_dir, filename)
         
         try:
-            # 1. Rimuovi i peli (Dull Razor)
+            # 1. Rimuove i peli (Dull Razor)
             clean_img = dull_razor(input_path)
             
-            # 2. Ridimensiona e denoise
+            # 2. Ridimensiona e applica denoise
             final_img = standardize_image(clean_img, target_size=target_size)
             
             # 3. Salva l'immagine elaborata

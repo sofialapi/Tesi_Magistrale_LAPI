@@ -1,3 +1,7 @@
+#implementazione degli algoritmi di standardizzazione dei dati clinici
+#preprocessing tabular data, VIF filtering, scaling, one-hot encoding
+#augmentor on the fly 
+#gestione dataset multimodale e image-only, creazione DataLoader PyTorch
 import os
 import pandas as pd
 import numpy as np
@@ -124,6 +128,7 @@ class DermalMultimodalDataset(Dataset):
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
         
         # 2- Applicazione dell'Augmentor
+        #vedi augmentation.py
         img_tensor = self.augmentor(img_rgb)
         
         # 3- Recupero della label del target (0 o 1) convertito in tensore PyTorch

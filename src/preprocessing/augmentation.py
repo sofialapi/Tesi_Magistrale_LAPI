@@ -1,3 +1,4 @@
+# processo di augmentation, sigmoid correction + trasformazioni geometriche e fotometriche
 import torch
 import torchvision.transforms.v2 as transforms
 import numpy as np
@@ -17,7 +18,7 @@ class DermalImageAugmentor:
         # 2. TRASFORMAZIONI GEOMETRICHE E FOTOMETRICHE AVANZATE (Solo per Training)
         if self.is_training:
             self.augmentation_transforms = transforms.Compose([
-                # Trasformazioni Geometriche richieste
+                # Trasformazioni Geometriche 
                 transforms.RandomRotation(degrees=(-30, 30), interpolation=transforms.InterpolationMode.BILINEAR),
                 transforms.RandomHorizontalFlip(p=0.5),
                 transforms.RandomVerticalFlip(p=0.5),
@@ -27,7 +28,7 @@ class DermalImageAugmentor:
                     scale=(0.9, 1.1),       # Zoom del +-10%
                     shear=(-5, 5)           # Distorsione angolare (shear)
                 ),
-                # Trasformazioni Fotometriche richieste
+                # Trasformazioni Fotometriche 
                 transforms.ColorJitter(
                     brightness=(0.8, 1.2),  # Regolazione luminosità
                     contrast=(0.8, 1.2)     # Regolazione contrasto
@@ -59,7 +60,7 @@ class DermalImageAugmentor:
         if self.is_training:
             img_tensor = self.augmentation_transforms(img_tensor)
             
-            # Applica la Intensity Sigmoid Correction con il 30% di probabilità per non esagerare
+            # Applica la Intensity Sigmoid Correction con il 30% di probabilità
             if torch.rand(1).item() < 0.3:
                 img_tensor = self._intensity_sigmoid_correction(img_tensor)
                 

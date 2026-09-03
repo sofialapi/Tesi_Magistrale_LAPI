@@ -1,3 +1,4 @@
+#train one epoch, evaluate, run stratified k-fold cross-validation
 import os
 import copy
 import numpy as np
