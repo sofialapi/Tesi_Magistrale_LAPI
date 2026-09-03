@@ -18,6 +18,9 @@ from src.models.multimodal_classifier import DermalClassifier
 from src.training.losses import BinaryFocalLoss
 from src.training.metrics import compute_clinical_metrics
 
+CHECKPOINTS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "..", "outputs", "checkpoints")
+os.makedirs(CHECKPOINTS_DIR, exist_ok=True)
+
 def train_one_epoch(model, dataloader, optimizer, criterion, device, mode):
     model.train()
     running_loss = 0.0
@@ -161,6 +164,9 @@ def run_stratified_kfold(
             if val_metrics["pr_auc"] >= best_prauc:
                 best_prauc = val_metrics["pr_auc"]
                 best_metrics = val_metrics
+                # Salvataggio del checkpoint ottimale per il fold corrente
+                ckpt_path = os.path.join(CHECKPOINTS_DIR, f"best_{case_study}_fold{fold+1}.pth")
+                torch.save(model.state_dict(), ckpt_path)
                 
             print(f"  Epoca {epoch+1:02d}/{epochs:02d} | TrLoss: {train_loss:.4f} | ValLoss: {val_metrics['val_loss']:.4f} | PR-AUC: {val_metrics['pr_auc']:.4f} | Recall: {val_metrics['sensitivity']:.4f}")
             
