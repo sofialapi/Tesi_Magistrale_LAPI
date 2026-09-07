@@ -1,11 +1,11 @@
-#train one epoch, evaluate, run stratified k-fold cross-validation
+# train.py
 import os
 import copy
 import numpy as np
 import pandas as pd
 import torch
 import torch.optim as optim
-from torch.optim.lr_scheduler import CosineAnnealingLR
+from torch.optim.lr_scheduler import LinearLR, CosineAnnealingLR, SequentialLR
 from sklearn.model_selection import StratifiedKFold
 
 from src.config import PROCESSED_ISIC_DIR
@@ -76,15 +76,16 @@ def run_stratified_kfold(
     image_dir: str = PROCESSED_ISIC_DIR,
     case_study: str = "hybrid_multimodal",  # 'cnn_only', 'hybrid_only', 'cnn_multimodal', 'hybrid_multimodal'
     k_folds: int = 5,
-    epochs: int = 10,
-    batch_size: int = 4,
+    epochs: int = 30,
+    warmup_epochs: int = 3,
+    patience: int = 7,
+    batch_size: int = 32,
     lr: float = 1e-4,
     device: str = None
 ):
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
     print(f"\n--- Avvio 5-Fold CV | Caso Studio: [{case_study}] | Device: {device} ---")
     
-    # Mappatura parametri modello
     backbone_type = 'cnn' if 'cnn' in case_study else 'hybrid'
     mode = 'multimodal' if 'multimodal' in case_study else 'image_only'
     
@@ -109,11 +110,10 @@ def run_stratified_kfold(
         y_val = df_val['target'].values
         val_ids = df_val['isic_id'].values
         
-        # 2. Applicazione SMOTE su Training Fold (se multimodale)
+        # 2. Applicazione SMOTE sul solo Training Fold (se multimodale)
         if mode == 'multimodal':
             smote = TabularSMOTEBalancer()
             X_train_clin, y_train_res = smote.balance(X_train_clin, y_train)
-            # Se SMOTE sovracampiona, duplichiamo coerentemente gli ID immagine per il training
             if len(y_train_res) > len(train_ids):
                 extra_needed = len(y_train_res) - len(train_ids)
                 minority_ids = train_ids[y_train == 1]
@@ -139,10 +139,10 @@ def run_stratified_kfold(
             is_training=False
         )
         
-        train_loader = create_multimodal_dataloader(train_ds, batch_size=batch_size, shuffle=True, num_workers=2)
-        val_loader = create_multimodal_dataloader(val_ds, batch_size=batch_size, shuffle=False, num_workers=2)
+        train_loader = create_multimodal_dataloader(train_ds, batch_size=batch_size, shuffle=True, num_workers=4)
+        val_loader = create_multimodal_dataloader(val_ds, batch_size=batch_size, shuffle=False, num_workers=4)
         
-        # 4. Istanziazione Modello, Loss, Ottimizzatore
+        # 4. Modello, Loss fissa (BinaryFocalLoss), Ottimizzatore AdamW
         model = DermalClassifier(
             backbone_type=backbone_type,
             mode=mode,
@@ -150,27 +150,40 @@ def run_stratified_kfold(
             pretrained=True
         ).to(device)
         
-        criterion = BinaryFocalLoss()
+        criterion = BinaryFocalLoss(alpha=0.25, gamma=2.0)
         optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-2)
-        scheduler = CosineAnnealingLR(optimizer, T_max=epochs)
         
-        best_prauc = 0.0
+        # 5. Configurazione Warmup + Cosine Annealing Scheduler
+        warmup_sched = LinearLR(optimizer, start_factor=0.1, end_factor=1.0, total_iters=warmup_epochs)
+        cosine_sched = CosineAnnealingLR(optimizer, T_max=max(1, epochs - warmup_epochs))
+        scheduler = SequentialLR(optimizer, schedulers=[warmup_sched, cosine_sched], milestones=[warmup_epochs])
+        
+        # 6. Variabili per Early Stopping su Val Loss e Checkpointing
+        best_val_loss = float('inf')
         best_metrics = None
+        patience_counter = 0
+        ckpt_path = os.path.join(CHECKPOINTS_DIR, f"best_{case_study}_fold{fold+1}.pth")
         
         for epoch in range(epochs):
             train_loss = train_one_epoch(model, train_loader, optimizer, criterion, device, mode)
             val_metrics = evaluate(model, val_loader, criterion, device, mode)
+            current_lr = optimizer.param_groups[0]['lr']
             scheduler.step()
             
-            if val_metrics["pr_auc"] >= best_prauc:
-                best_prauc = val_metrics["pr_auc"]
-                best_metrics = val_metrics
-                # Salvataggio del checkpoint ottimale per il fold corrente
-                ckpt_path = os.path.join(CHECKPOINTS_DIR, f"best_{case_study}_fold{fold+1}.pth")
-                torch.save(model.state_dict(), ckpt_path)
-                
-            print(f"  Epoca {epoch+1:02d}/{epochs:02d} | TrLoss: {train_loss:.4f} | ValLoss: {val_metrics['val_loss']:.4f} | PR-AUC: {val_metrics['pr_auc']:.4f} | Recall: {val_metrics['sensitivity']:.4f}")
+            print(f"  Epoca {epoch+1:02d}/{epochs:02d} [LR: {current_lr:.6f}] | TrLoss: {train_loss:.4f} | ValLoss: {val_metrics['val_loss']:.4f} | PR-AUC: {val_metrics['pr_auc']:.4f} | Recall: {val_metrics['sensitivity']:.4f}")
             
+            # Early Stopping basato sul minimo di Validation Loss
+            if val_metrics["val_loss"] < best_val_loss:
+                best_val_loss = val_metrics["val_loss"]
+                best_metrics = val_metrics
+                patience_counter = 0
+                torch.save(model.state_dict(), ckpt_path)
+            else:
+                patience_counter += 1
+                if patience_counter >= patience:
+                    print(f"  [EARLY STOPPING] Nessun miglioramento della Val Loss per {patience} epoche consecutive al Fold {fold+1}.")
+                    break
+                    
         fold_results.append(best_metrics)
         
     print(f"\n=== Valutazione Media sui {k_folds} Fold ===")
