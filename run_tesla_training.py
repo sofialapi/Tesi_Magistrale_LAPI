@@ -17,12 +17,18 @@ def main():
     parser.add_argument("--lr", type=float, default=1e-4, help="Learning rate per AdamW")
     
     args = parser.parse_args()
-    
+
+    #VECCHIO
     # Imposta la GPU specifica da allocare sul server
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
-    device = "cuda:0" if torch.cuda.is_available() else "cpu"
-    print(f"[TESLA EXEC] Device allocato: {device} (Physical GPU ID: {args.gpu})")
+    #os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
+    #device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    #print(f"[TESLA EXEC] Device allocato: {device} (Physical GPU ID: {args.gpu})")
     
+    #NUOVO
+    # Slurm gestisce in automatico CUDA_VISIBLE_DEVICES isolando la P100 allocata
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"[TESLA EXEC] Device allocato: {device} | CUDA_VISIBLE_DEVICES={os.environ.get('CUDA_VISIBLE_DEVICES')}")
+
     csv_path = os.path.join(RAW_ISIC_DIR, "metadata_sample.csv")
     df = pd.read_csv(csv_path)
     
