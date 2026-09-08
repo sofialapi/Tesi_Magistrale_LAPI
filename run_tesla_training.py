@@ -29,7 +29,9 @@ def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"[TESLA EXEC] Device allocato: {device} | CUDA_VISIBLE_DEVICES={os.environ.get('CUDA_VISIBLE_DEVICES')}")
 
-    csv_path = os.path.join(RAW_ISIC_DIR, "metadata_sample.csv")
+    #csv_path = os.path.join(RAW_ISIC_DIR, "metadata_sample.csv")
+    #sotto: nuovo path per cartella locale tesla
+    csv_path = os.path.join(RAW_ISIC_DIR, "metadata_isic_subset.csv")
     df = pd.read_csv(csv_path)
     
     run_stratified_kfold(
