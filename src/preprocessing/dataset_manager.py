@@ -113,35 +113,38 @@ class DermalMultimodalDataset(Dataset):
         return len(self.image_ids)
 
     def __getitem__(self, idx):
-        # 1- Recupero dell'ID e caricamento dell'immagine fisica dal disco (data/processed/)
+        # 1- Recupero dell'ID e caricamento dell'immagine fisica dal disco
         img_id = self.image_ids[idx]
-        
-        # Gestione flessibile dell'estensione del file
         img_name = f"{img_id}.jpg"
         img_path = os.path.join(self.image_dir, img_name)
         
         if not os.path.exists(img_path):
             raise FileNotFoundError(f"[ERRORE DATASET] Immagine non trovata nel percorso: {img_path}")
             
-        # Lettura in formato OpenCV e conversione cromatica corretta
+        # Lettura OpenCV e conversione cromatica BGR -> RGB
         img_bgr = cv2.imread(img_path)
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
         
-        # 2- Applicazione dell'Augmentor
-        #vedi augmentation.py
-        img_tensor = self.augmentor(img_rgb)
+        # 2- Recupero della label del target (0 o 1)
+        label_val = int(self.labels[idx])
+        label_tensor = torch.tensor(label_val, dtype=torch.long)
         
-        # 3- Recupero della label del target (0 o 1) convertito in tensore PyTorch
-        label_tensor = torch.tensor(self.labels[idx], dtype=torch.long)
+        # 3- Applicazione Condizionale dell'Augmentation
+        # Se siamo in addestramento E la lesione e' maligna (label 1), applichiamo
+        # le trasformazioni geometriche, fotometriche e la correzione sigmoidea
+        if self.is_training and label_val == 1:
+            img_tensor = self.augmentor(img_rgb)
+        else:
+            # Per i casi benigni o durante la validazione, applichiamo solo 
+            # resize, conversione a tensore e scalatura float [0, 1]
+            img_tensor = self.augmentor.base_transforms(img_rgb)
         
-        # 4- Restituzione condizionale in base alla modalità selezionata
+        # 4- Restituzione condizionale in base alla modalita' selezionata
         if self.mode == 'multimodal':
-            # Estrazione della riga corrispondente e conversione in tensore float32
             clinical_vector = self.clinical_matrix[idx]
             clinical_tensor = torch.tensor(clinical_vector, dtype=torch.float32)
             return img_tensor, clinical_tensor, label_tensor
         else:
-            # Modalità Image-Only: esclude parte tabulare
             return img_tensor, label_tensor
 
 
