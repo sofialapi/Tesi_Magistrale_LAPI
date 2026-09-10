@@ -113,31 +113,27 @@ class DermalMultimodalDataset(Dataset):
         return len(self.image_ids)
 
     def __getitem__(self, idx):
-        # 1- Recupero dell'ID e caricamento dell'immagine fisica dal disco
+        # 1- Recupero dell'ID e caricamento dell'immagine fisica dal disco (data/processed/)
         img_id = self.image_ids[idx]
+        
+        # Gestione flessibile dell'estensione del file
         img_name = f"{img_id}.jpg"
         img_path = os.path.join(self.image_dir, img_name)
         
         if not os.path.exists(img_path):
             raise FileNotFoundError(f"[ERRORE DATASET] Immagine non trovata nel percorso: {img_path}")
             
-        # Lettura OpenCV e conversione cromatica BGR -> RGB
+        # Lettura in formato OpenCV e conversione cromatica corretta
         img_bgr = cv2.imread(img_path)
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
         
-        # 2- Recupero della label (0: benigno, 1: melanoma)
-        label_val = int(self.labels[idx])
-        label_tensor = torch.tensor(label_val, dtype=torch.long)
+        # 2- Applicazione dell'Augmentor
+        img_tensor = self.augmentor(img_rgb)
         
-        # 3- Augmentation selettiva sulla sola classe positiva (melanoma)
-        if self.is_training and label_val == 1:
-            # Trasformazioni geometriche, fotometriche e correzione sigmoidea
-            img_tensor = self.augmentor(img_rgb)
-        else:
-            # Per i campioni sani (label 0) o durante la validazione: solo resize e tensor [0, 1]
-            img_tensor = self.augmentor.base_transforms(img_rgb)
+        # 3- Recupero della label del target (0 o 1) convertito in tensore PyTorch
+        label_tensor = torch.tensor(self.labels[idx], dtype=torch.long)
         
-        # 4- Output per modalita'
+        # 4- Restituzione condizionale in base alla modalita' selezionata
         if self.mode == 'multimodal':
             clinical_vector = self.clinical_matrix[idx]
             clinical_tensor = torch.tensor(clinical_vector, dtype=torch.float32)

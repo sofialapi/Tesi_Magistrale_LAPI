@@ -151,9 +151,7 @@ def run_stratified_kfold(
         ).to(device)
         
         #sotto: valori di alpha e gamma per primo set di addestramenti
-        # criterion = BinaryFocalLoss(alpha=0.25, gamma=2.0)
-        #sotto: nuovi valori di alpha e gamma per secondo set di addestramenti
-        criterion = BinaryFocalLoss(alpha=0.75, gamma=2.0)
+        criterion = BinaryFocalLoss(alpha=0.25, gamma=2.0)
         optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-2)
         
         # 5. Configurazione Warmup + Cosine Annealing Scheduler
