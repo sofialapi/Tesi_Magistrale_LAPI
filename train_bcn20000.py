@@ -46,12 +46,13 @@ def main():
     parser.add_argument('--lr', type=float, default=1e-4)
     parser.add_argument('--data_dir', type=str, default='data/bcn20000')
     parser.add_argument('--save_dir', type=str, default='outputs/checkpoints')
-    parser.add_argument('--quick_xai', action='store_true', help='Se specificato, allena solo Fold 1 per salvare rapidamente i pesi XAI')
+    parser.add_argument('--output_dir', type=str, default='outputs')
     args = parser.parse_args()
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     os.makedirs(args.save_dir, exist_ok=True)
-    print(f"=== Esperimento BCN20000: [{args.arch}] su {device} ===")
+    os.makedirs(args.output_dir, exist_ok=True)
+    print(f"=== Esperimento Completo BCN20000: [{args.arch}] su {device} ===")
 
     csv_path = os.path.join(args.data_dir, 'train.csv')
     img_dir = os.path.join(args.data_dir, 'train')
@@ -60,7 +61,6 @@ def main():
         raise FileNotFoundError(f"CSV non trovato: {csv_path}")
 
     df = pd.read_csv(csv_path)
-
     col_name = 'image_name' if 'image_name' in df.columns else 'image'
     
     if 'target' in df.columns:
@@ -91,8 +91,13 @@ def main():
     df['filepath'] = mapped_paths
     initial_len = len(df)
     df = df.dropna(subset=['filepath']).reset_index(drop=True)
+    neg_count = sum(df['target'] == 0)
+    pos_count = sum(df['target'] == 1)
     print(f"Dataset filtrato: {len(df)} su {initial_len} campioni validi.")
-    print(f"Distribuzione classi: Negativi={sum(df['target']==0)}, Melanomi={sum(df['target']==1)}")
+    print(f"Distribuzione classi: Negativi={neg_count}, Melanomi={pos_count}")
+
+    # Ponderazione asimmetrica per bilanciare la loss
+    pos_weight = torch.tensor([neg_count / pos_count]).to(device)
 
     train_tf = transforms.Compose([
         transforms.RandomResizedCrop(224, scale=(0.8, 1.0)),
@@ -111,12 +116,13 @@ def main():
     ])
 
     skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-    criterion = nn.BCEWithLogitsLoss()
+    criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
 
-    best_checkpoint_path = os.path.join(args.save_dir, f"best_{args.arch}_bcn20000.pth")
+    global_best_auc = 0.0
+    history_records = []
 
     for fold, (train_idx, val_idx) in enumerate(skf.split(df, df['target'])):
-        print(f"\n--- Fold {fold + 1}/5 ---")
+        print(f"\n==================== Fold {fold + 1}/5 ====================")
         train_df = df.iloc[train_idx]
         val_df = df.iloc[val_idx]
 
@@ -161,17 +167,34 @@ def main():
             mcc = matthews_corrcoef(true_labels, bin_preds)
             rec = recall_score(true_labels, bin_preds, zero_division=0)
 
-            saved_msg = ""
+            # Salvataggio storico per i grafici
+            history_records.append({
+                'fold': fold + 1,
+                'epoch': epoch,
+                'train_loss': tr_loss,
+                'val_loss': val_loss,
+                'pr_auc': pr_auc,
+                'recall': rec,
+                'mcc': mcc
+            })
+
+            # Checkpoint per fold
             if pr_auc > best_pr_auc_fold:
                 best_pr_auc_fold = pr_auc
-                torch.save(model.state_dict(), best_checkpoint_path)
-                saved_msg = f" [SALVATO in {best_checkpoint_path}]"
+                torch.save(model.state_dict(), os.path.join(args.save_dir, f"best_{args.arch}_fold{fold+1}.pth"))
 
-            print(f"Epoca {epoch:02d}/{args.epochs} | TrLoss: {tr_loss:.4f} | ValLoss: {val_loss:.4f} | PR-AUC: {pr_auc:.4f} | Recall: {rec:.4f} | MCC: {mcc:.4f}{saved_msg}")
+            # Checkpoint migliore in assoluto (usato da XAI Grad-CAM)
+            if pr_auc > global_best_auc:
+                global_best_auc = pr_auc
+                torch.save(model.state_dict(), os.path.join(args.save_dir, f"best_{args.arch}_bcn20000.pth"))
 
-        if args.quick_xai:
-            print("\nModalità --quick_xai attiva: Fold 1 completato e pesi salvati. Uscita per generazione XAI.")
-            break
+            print(f"Epoca {epoch:02d}/{args.epochs} | TrLoss: {tr_loss:.4f} | ValLoss: {val_loss:.4f} | PR-AUC: {pr_auc:.4f} | Recall: {rec:.4f} | MCC: {mcc:.4f}")
+
+    # Salva CSV con tutte le metriche
+    metrics_csv = os.path.join(args.output_dir, f"metrics_bcn_{args.arch}.csv")
+    pd.DataFrame(history_records).to_csv(metrics_csv, index=False)
+    print(f"\n[COMPLETATO] Metriche salvate in: {metrics_csv}")
 
 if __name__ == '__main__':
     main()
+
