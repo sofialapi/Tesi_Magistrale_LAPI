@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-# Stile tipografico per tesi magistrale
+# Stile tipografico coerente con tesi magistrale
 plt.rcParams.update({
     "font.size": 11,
     "axes.labelsize": 12,
@@ -22,7 +22,7 @@ files = {
     "MobileViT-S (Hybrid)": "outputs/metrics_bcn_hybrid.csv",
 }
 
-# Blu per CNN, Arancione per Hybrid
+# Blu (#1f77b4) per ResNet-50, Arancione (#ff7f0e) per MobileViT-S
 palette = {
     "ResNet-50 (CNN)": "#1f77b4",
     "MobileViT-S (Hybrid)": "#ff7f0e",
