@@ -132,7 +132,6 @@ print(f"[OK] Salvato: {plot2_path}")
 # -------------------------------------------------------------
 # GRAFICO 3: Boxplot delle Prestazioni sui 5 Fold (Migliori Valori)
 # -------------------------------------------------------------
-# Estraiamo la miglior epoca per ciascun fold (criterio: massima PR-AUC)
 best_per_fold = (
     df_all.sort_values(by=["Model", "fold", "pr_auc"], ascending=False)
     .groupby(["Model", "fold"])
@@ -211,7 +210,6 @@ print(f"[OK] Salvato: {plot3_path}")
 # -------------------------------------------------------------
 # GRAFICO 4: Sintesi Finale a Barre delle Medie Globali (Inclusi MCC)
 # -------------------------------------------------------------
-# Riepilogo finale aggregato dei log
 summary_data = {
     "Modello": [
         "CNN Only",
@@ -219,9 +217,9 @@ summary_data = {
         "CNN Multimodal",
         "Hybrid Multimodal",
     ],
-    "PR-AUC": [0.4208, 0.5062, 0.4282, 0.4869],
-    "Sensibilità": [0.0380, 0.1348, 0.4174, 0.4224],
-    "MCC": [0.1545, 0.3350, 0.4381, 0.4677],
+    "PR-AUC": [0.4151, 0.4705, 0.4876, 0.4671],
+    "Sensibilità": [0.4581, 0.4070, 0.4964, 0.3892],
+    "MCC": [0.4168, 0.4531, 0.4814, 0.4506],
 }
 df_summary = pd.DataFrame(summary_data)
 df_summary_melted = pd.melt(
