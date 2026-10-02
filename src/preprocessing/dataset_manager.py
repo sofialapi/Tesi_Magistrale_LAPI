@@ -38,7 +38,6 @@ class ClinicalMetadataProcessor:
         features = df_num.columns.tolist()
         
         while len(features) > 1:
-            # Calcolo VIF per ciascuna colonna corrente
             vif_data = pd.DataFrame()
             vif_data["feature"] = features
             vif_data["VIF"] = [
@@ -58,15 +57,12 @@ class ClinicalMetadataProcessor:
         return df_num[features]
 
     def fit_transform(self, df: pd.DataFrame) -> np.ndarray:
-        # 1- Imputazione
         df_num = pd.DataFrame(self.num_imputer.fit_transform(df[self.num_cols]), columns=self.num_cols)
         df_cat = pd.DataFrame(self.cat_imputer.fit_transform(df[self.cat_cols]), columns=self.cat_cols)
         
-        # 2- Filtraggio VIF sulle sole feature numeriche
         df_num_filtered = self._compute_and_filter_vif(df_num)
         self.selected_num_cols = df_num_filtered.columns.tolist()
         
-        # 3- Scaling e One-Hot Encoding
         X_num_scaled = self.scaler.fit_transform(df_num_filtered)
         X_cat_encoded = self.encoder.fit_transform(df_cat)
         
@@ -99,48 +95,37 @@ class DermalMultimodalDataset(Dataset):
         self.mode = mode.lower()
         self.is_training = is_training
         
-        # Validazione di sicurezza della modalità prescelta
         if self.mode not in ['multimodal', 'image_only']:
             raise ValueError("La modalità del dataset deve essere impostata su 'multimodal' o 'image_only'.")
             
         if self.mode == 'multimodal' and self.clinical_matrix is None:
             raise ValueError("La modalità 'multimodal' richiede obbligatoriamente il passaggio della matrice dei metadati clinici.")
             
-        # Inizializzazione dell'Augmentor on-the-fly 
         self.augmentor = DermalImageAugmentor(target_size=target_size, is_training=self.is_training)
 
     def __len__(self):
         return len(self.image_ids)
 
     def __getitem__(self, idx):
-        # 1- Recupero dell'ID e caricamento dell'immagine fisica dal disco (data/processed/)
         img_id = self.image_ids[idx]
-        
-        # Gestione flessibile dell'estensione del file
         img_name = f"{img_id}.jpg"
         img_path = os.path.join(self.image_dir, img_name)
         
         if not os.path.exists(img_path):
             raise FileNotFoundError(f"[ERRORE DATASET] Immagine non trovata nel percorso: {img_path}")
             
-        # Lettura in formato OpenCV e conversione cromatica corretta
         img_bgr = cv2.imread(img_path)
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
         
-        # 2- Applicazione dell'Augmentor
         img_tensor = self.augmentor(img_rgb)
-        
-        # 3- Recupero della label del target (0 o 1) convertito in tensore PyTorch
         label_tensor = torch.tensor(self.labels[idx], dtype=torch.long)
         
-        # 4- Restituzione condizionale in base alla modalita' selezionata
         if self.mode == 'multimodal':
             clinical_vector = self.clinical_matrix[idx]
             clinical_tensor = torch.tensor(clinical_vector, dtype=torch.float32)
             return img_tensor, clinical_tensor, label_tensor
         else:
             return img_tensor, label_tensor
-
 
 def load_and_process_metadata(csv_path: str):
     """Funzione helper per caricare e preparare i metadati clinici di ISIC."""
@@ -158,21 +143,24 @@ def load_and_process_metadata(csv_path: str):
     
     return X_clinical, y, image_ids
 
-def create_multimodal_dataloader(dataset: Dataset, batch_size: int = 4, shuffle: bool = True, num_workers: int = 2) -> DataLoader:
+def create_multimodal_dataloader(
+    dataset: Dataset, 
+    batch_size: int = 4, 
+    shuffle: bool = True, 
+    num_workers: int = 2,
+    sampler = None
+) -> DataLoader:
     """
-    Fabbrica e configura un'istanza di DataLoader PyTorch ottimizzata per l'ambiente locale.
-    
-    Parametri:
-    - dataset: Istanza di DermalMultimodalDataset (in modalità multimodal o image_only).
-    - batch_size: Numero di campioni per batch (impostato basso di default per la VM locale).
-    - shuffle: Se True, mescola i dati ad ogni epoca (fondamentale in training).
-    - num_workers: Numero di core CPU dedicati al caricamento parallelo in background.
+    Fabbrica e configura un'istanza di DataLoader PyTorch.
+    Supporta sampler esplicito (es. WeightedRandomSampler per sbilanciamento estremo).
     """
+    actual_shuffle = False if sampler is not None else shuffle
     dataloader = DataLoader(
         dataset=dataset,
         batch_size=batch_size,
-        shuffle=shuffle,
+        shuffle=actual_shuffle,
+        sampler=sampler,
         num_workers=num_workers,
-        pin_memory=True if torch.cuda.is_available() else False # Ottimizza il passaggio verso la GPU
+        pin_memory=True if torch.cuda.is_available() else False
     )
     return dataloader

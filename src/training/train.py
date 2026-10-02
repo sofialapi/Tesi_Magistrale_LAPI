@@ -6,6 +6,7 @@ import pandas as pd
 import torch
 import torch.optim as optim
 from torch.optim.lr_scheduler import LinearLR, CosineAnnealingLR, SequentialLR
+from torch.utils.data import WeightedRandomSampler
 from sklearn.model_selection import StratifiedKFold
 
 from src.config import PROCESSED_ISIC_DIR
@@ -14,7 +15,6 @@ from src.preprocessing.dataset_manager import (
     DermalMultimodalDataset,
     create_multimodal_dataloader
 )
-from src.preprocessing.balancer import TabularSMOTEBalancer
 from src.models.multimodal_classifier import DermalClassifier
 from src.training.losses import BinaryFocalLoss
 from src.training.metrics import compute_clinical_metrics
@@ -74,7 +74,7 @@ def evaluate(model, dataloader, criterion, device, mode):
 def run_stratified_kfold(
     df_metadata: pd.DataFrame,
     image_dir: str = PROCESSED_ISIC_DIR,
-    case_study: str = "hybrid_multimodal",  # 'cnn_only', 'hybrid_only', 'cnn_multimodal', 'hybrid_multimodal'
+    case_study: str = "hybrid_multimodal",
     k_folds: int = 5,
     epochs: int = 30,
     warmup_epochs: int = 3,
@@ -100,33 +100,36 @@ def run_stratified_kfold(
         df_train, df_val = df_metadata.iloc[train_idx].copy(), df_metadata.iloc[val_idx].copy()
         
         # 1. Pipeline Isolamento Metadati
-        meta_processor = ClinicalMetadataProcessor()
-        X_train_clin = meta_processor.fit_transform(df_train)
-        X_val_clin = meta_processor.transform(df_val)
-        clin_dim = X_train_clin.shape[1]
+        if mode == 'multimodal':
+            meta_processor = ClinicalMetadataProcessor()
+            X_train_clin = meta_processor.fit_transform(df_train)
+            X_val_clin = meta_processor.transform(df_val)
+            clin_dim = X_train_clin.shape[1]
+        else:
+            X_train_clin, X_val_clin = None, None
+            clin_dim = 0
         
         y_train = df_train['target'].values
         train_ids = df_train['isic_id'].values
         y_val = df_val['target'].values
         val_ids = df_val['isic_id'].values
         
-        # 2. Applicazione SMOTE sul solo Training Fold (se multimodale)
-        if mode == 'multimodal':
-            smote = TabularSMOTEBalancer()
-            X_train_clin, y_train_res = smote.balance(X_train_clin, y_train)
-            if len(y_train_res) > len(train_ids):
-                extra_needed = len(y_train_res) - len(train_ids)
-                minority_ids = train_ids[y_train == 1]
-                sampled_extras = np.random.choice(minority_ids, size=extra_needed, replace=True)
-                train_ids = np.concatenate([train_ids, sampled_extras])
-            y_train = y_train_res
+        # 2. Bilanciamento delle classi reale con WeightedRandomSampler (no sintetizzazione artificiale)
+        class_counts = np.bincount(y_train)
+        class_weights = 1.0 / np.maximum(class_counts, 1)
+        sample_weights = class_weights[y_train]
+        train_sampler = WeightedRandomSampler(
+            weights=torch.DoubleTensor(sample_weights),
+            num_samples=len(sample_weights),
+            replacement=True
+        )
             
         # 3. Dataset e DataLoader
         train_ds = DermalMultimodalDataset(
             image_ids=train_ids,
             labels=y_train,
             image_dir=image_dir,
-            clinical_matrix=X_train_clin if mode == 'multimodal' else None,
+            clinical_matrix=X_train_clin,
             mode=mode,
             is_training=True
         )
@@ -134,15 +137,19 @@ def run_stratified_kfold(
             image_ids=val_ids,
             labels=y_val,
             image_dir=image_dir,
-            clinical_matrix=X_val_clin if mode == 'multimodal' else None,
+            clinical_matrix=X_val_clin,
             mode=mode,
             is_training=False
         )
         
-        train_loader = create_multimodal_dataloader(train_ds, batch_size=batch_size, shuffle=True, num_workers=4)
-        val_loader = create_multimodal_dataloader(val_ds, batch_size=batch_size, shuffle=False, num_workers=4)
+        train_loader = create_multimodal_dataloader(
+            train_ds, batch_size=batch_size, num_workers=4, sampler=train_sampler
+        )
+        val_loader = create_multimodal_dataloader(
+            val_ds, batch_size=batch_size, shuffle=False, num_workers=4
+        )
         
-        # 4. Modello, Loss fissa (BinaryFocalLoss), Ottimizzatore AdamW
+        # 4. Modello, Loss (BinaryFocalLoss), Ottimizzatore AdamW
         model = DermalClassifier(
             backbone_type=backbone_type,
             mode=mode,
@@ -150,16 +157,15 @@ def run_stratified_kfold(
             pretrained=True
         ).to(device)
         
-        #sotto: valori di alpha e gamma per primo set di addestramenti
         criterion = BinaryFocalLoss(alpha=0.25, gamma=2.0)
         optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-2)
         
-        # 5. Configurazione Warmup + Cosine Annealing Scheduler
+        # 5. Warmup + Cosine Annealing Scheduler
         warmup_sched = LinearLR(optimizer, start_factor=0.1, end_factor=1.0, total_iters=warmup_epochs)
         cosine_sched = CosineAnnealingLR(optimizer, T_max=max(1, epochs - warmup_epochs))
         scheduler = SequentialLR(optimizer, schedulers=[warmup_sched, cosine_sched], milestones=[warmup_epochs])
         
-        # 6. Variabili per Early Stopping su Val Loss e Checkpointing
+        # 6. Early Stopping e Checkpoint
         best_val_loss = float('inf')
         best_metrics = None
         patience_counter = 0
@@ -173,7 +179,6 @@ def run_stratified_kfold(
             
             print(f"  Epoca {epoch+1:02d}/{epochs:02d} [LR: {current_lr:.6f}] | TrLoss: {train_loss:.4f} | ValLoss: {val_metrics['val_loss']:.4f} | PR-AUC: {val_metrics['pr_auc']:.4f} | Recall: {val_metrics['sensitivity']:.4f}")
             
-            # Early Stopping basato sul minimo di Validation Loss
             if val_metrics["val_loss"] < best_val_loss:
                 best_val_loss = val_metrics["val_loss"]
                 best_metrics = val_metrics
