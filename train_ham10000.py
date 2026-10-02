@@ -9,6 +9,31 @@ import pandas as pd
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 
+class DermalAugmentor:
+    def __init__(self, is_training=True):
+        self.is_training = is_training
+        if self.is_training:
+            self.aug = transforms.Compose([
+                transforms.RandomRotation(degrees=(-30, 30)),
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.RandomVerticalFlip(p=0.5),
+                transforms.RandomAffine(degrees=0, translate=(0.05, 0.05), scale=(0.9, 1.1), shear=(-5, 5)),
+                transforms.ColorJitter(brightness=(0.8, 1.2), contrast=(0.8, 1.2))
+            ])
+        self.norm = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+
+    def _sigmoid_correction(self, t: torch.Tensor, cutoff=0.5, gain=10.0) -> torch.Tensor:
+        c = 1.0 / (1.0 + torch.exp(gain * (cutoff - t)))
+        return (c - c.min()) / (c.max() - c.min() + 1e-6)
+
+    def __call__(self, img_pil):
+        t = transforms.functional.to_tensor(img_pil)
+        if self.is_training:
+            t = self.aug(t)
+            if torch.rand(1).item() < 0.3:
+                t = self._sigmoid_correction(t)
+        return self.norm(t)
+
 class HAMDataset(Dataset):
     def __init__(self, df, transform=None):
         self.df = df.reset_index(drop=True)
@@ -36,7 +61,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--arch', type=str, required=True, choices=['cnn', 'hybrid'])
     parser.add_argument('--epochs', type=int, default=20)
-    parser.add_argument('--batch_size', type=int, default=64)
+    parser.add_argument('--batch_size', type=int, default=16)
     parser.add_argument('--lr', type=float, default=1e-4)
     parser.add_argument('--csv_path', type=str, default='data/ham10000/ham10000_prepared.csv')
     parser.add_argument('--save_dir', type=str, default='outputs/checkpoints')
@@ -46,30 +71,18 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     os.makedirs(args.save_dir, exist_ok=True)
     os.makedirs(args.output_dir, exist_ok=True)
-    print(f"=== Addestramento HAM10000: [{args.arch.upper()}] su {device} ===")
+    print(f"=== HAM10000 DullRazor: [{args.arch.upper()}] (Batch: {args.batch_size}, AMP: True) ===")
 
     df = pd.read_csv(args.csv_path)
     neg_count = sum(df['target'] == 0)
     pos_count = sum(df['target'] == 1)
     pos_weight = torch.tensor([neg_count / pos_count]).to(device)
 
-    train_tf = transforms.Compose([
-        transforms.RandomResizedCrop(224, scale=(0.8, 1.0)),
-        transforms.RandomHorizontalFlip(p=0.5),
-        transforms.RandomVerticalFlip(p=0.5),
-        transforms.RandomRotation(90),
-        transforms.ColorJitter(brightness=0.15, contrast=0.15, saturation=0.15, hue=0.05),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
-
-    val_tf = transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
+    train_tf = DermalAugmentor(is_training=True)
+    val_tf = DermalAugmentor(is_training=False)
 
     criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+    scaler = torch.amp.GradScaler('cuda')
     global_best_auc = 0.0
     history_records = []
 
@@ -91,10 +104,12 @@ def main():
             for imgs, targets in train_loader:
                 imgs, targets = imgs.to(device), targets.to(device).unsqueeze(1)
                 optimizer.zero_grad()
-                outputs = model(imgs)
-                loss = criterion(outputs, targets)
-                loss.backward()
-                optimizer.step()
+                with torch.amp.autocast('cuda'):
+                    outputs = model(imgs)
+                    loss = criterion(outputs, targets)
+                scaler.scale(loss).backward()
+                scaler.step(optimizer)
+                scaler.update()
                 tr_loss += loss.item() * imgs.size(0)
             tr_loss /= len(train_loader.dataset)
 
@@ -104,8 +119,9 @@ def main():
             with torch.no_grad():
                 for imgs, targets in val_loader:
                     imgs, targets = imgs.to(device), targets.to(device).unsqueeze(1)
-                    outputs = model(imgs)
-                    loss = criterion(outputs, targets)
+                    with torch.amp.autocast('cuda'):
+                        outputs = model(imgs)
+                        loss = criterion(outputs, targets)
                     val_loss += loss.item() * imgs.size(0)
                     preds.extend(torch.sigmoid(outputs).cpu().numpy().flatten())
                     true_labels.extend(targets.cpu().numpy().flatten())
@@ -132,6 +148,9 @@ def main():
                 torch.save(model.state_dict(), os.path.join(args.save_dir, f"best_{args.arch}_ham10000.pth"))
 
             print(f"Epoca {epoch:02d}/{args.epochs} | TrLoss: {tr_loss:.4f} | ValLoss: {val_loss:.4f} | PR-AUC: {pr_auc:.4f} | Recall: {rec:.4f} | MCC: {mcc:.4f}")
+
+        del model, optimizer
+        torch.cuda.empty_cache()
 
     csv_out = os.path.join(args.output_dir, f"metrics_ham10000_{args.arch}.csv")
     pd.DataFrame(history_records).to_csv(csv_out, index=False)
