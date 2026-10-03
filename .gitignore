@@ -30,3 +30,6 @@ outputs/
 Thumbs.db
 
 *.egg-info/*.log
+outputs/vgg/checkpoints/
+outputs/vgg/*.log
+outputs/vgg/*.err
