@@ -1,0 +1,233 @@
+nohup: ignoring input
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+=== TRAINING: HAM10000 | Image-Only Raw | ResNet-50 (CNN) su cuda ===
+Dataset HAM10000 caricato: 10015 immagini valide.
+Distribuzione: Negativi=8902, Melanomi=1113
+
+==================== Fold 1/5 ====================
+Epoca 01/20 | TrLoss: 1.1209 | ValLoss: 0.9552 | PR-AUC: 0.3975 | Recall: 0.9099 | MCC: 0.3014
+Epoca 02/20 | TrLoss: 0.8201 | ValLoss: 0.8211 | PR-AUC: 0.4875 | Recall: 0.8784 | MCC: 0.3372
+Epoca 03/20 | TrLoss: 0.6982 | ValLoss: 0.7340 | PR-AUC: 0.5662 | Recall: 0.7793 | MCC: 0.4398
+Epoca 04/20 | TrLoss: 0.6095 | ValLoss: 0.7383 | PR-AUC: 0.5887 | Recall: 0.7658 | MCC: 0.4981
+Epoca 05/20 | TrLoss: 0.5444 | ValLoss: 0.6853 | PR-AUC: 0.5958 | Recall: 0.8739 | MCC: 0.4849
+Epoca 06/20 | TrLoss: 0.4667 | ValLoss: 0.7077 | PR-AUC: 0.6159 | Recall: 0.7838 | MCC: 0.5112
+Epoca 07/20 | TrLoss: 0.4205 | ValLoss: 0.7013 | PR-AUC: 0.6185 | Recall: 0.8153 | MCC: 0.5063
+Epoca 08/20 | TrLoss: 0.3622 | ValLoss: 0.7331 | PR-AUC: 0.6471 | Recall: 0.8604 | MCC: 0.4700
+Epoca 09/20 | TrLoss: 0.3371 | ValLoss: 0.7408 | PR-AUC: 0.6383 | Recall: 0.8378 | MCC: 0.4932
+Epoca 10/20 | TrLoss: 0.3011 | ValLoss: 0.8462 | PR-AUC: 0.6420 | Recall: 0.7252 | MCC: 0.5323
+Epoca 11/20 | TrLoss: 0.2508 | ValLoss: 0.9633 | PR-AUC: 0.6366 | Recall: 0.6802 | MCC: 0.5502
+Epoca 12/20 | TrLoss: 0.2097 | ValLoss: 1.1348 | PR-AUC: 0.6484 | Recall: 0.6261 | MCC: 0.5326
+Epoca 13/20 | TrLoss: 0.1841 | ValLoss: 0.8456 | PR-AUC: 0.6318 | Recall: 0.8153 | MCC: 0.5270
+Epoca 14/20 | TrLoss: 0.1765 | ValLoss: 1.0803 | PR-AUC: 0.6565 | Recall: 0.6667 | MCC: 0.5325
+Epoca 15/20 | TrLoss: 0.1400 | ValLoss: 1.1063 | PR-AUC: 0.6515 | Recall: 0.6622 | MCC: 0.5592
+Epoca 16/20 | TrLoss: 0.1316 | ValLoss: 1.1816 | PR-AUC: 0.6382 | Recall: 0.6532 | MCC: 0.5214
+Epoca 17/20 | TrLoss: 0.1309 | ValLoss: 0.9973 | PR-AUC: 0.6512 | Recall: 0.7342 | MCC: 0.5560
+Epoca 18/20 | TrLoss: 0.1105 | ValLoss: 1.0155 | PR-AUC: 0.6570 | Recall: 0.7658 | MCC: 0.5317
+Epoca 19/20 | TrLoss: 0.1118 | ValLoss: 0.9655 | PR-AUC: 0.6654 | Recall: 0.7703 | MCC: 0.5740
+Epoca 20/20 | TrLoss: 0.1004 | ValLoss: 1.3902 | PR-AUC: 0.6623 | Recall: 0.5946 | MCC: 0.5282
+
+==================== Fold 2/5 ====================
+Epoca 01/20 | TrLoss: 1.1341 | ValLoss: 0.9391 | PR-AUC: 0.3920 | Recall: 0.9099 | MCC: 0.3277
+Epoca 02/20 | TrLoss: 0.8679 | ValLoss: 0.7831 | PR-AUC: 0.5316 | Recall: 0.8694 | MCC: 0.3648
+Epoca 03/20 | TrLoss: 0.7505 | ValLoss: 0.7231 | PR-AUC: 0.5834 | Recall: 0.8063 | MCC: 0.4527
+Epoca 04/20 | TrLoss: 0.6549 | ValLoss: 0.6817 | PR-AUC: 0.6139 | Recall: 0.8243 | MCC: 0.4407
+Epoca 05/20 | TrLoss: 0.5718 | ValLoss: 0.6860 | PR-AUC: 0.6040 | Recall: 0.7703 | MCC: 0.4985
+Epoca 06/20 | TrLoss: 0.4991 | ValLoss: 0.7932 | PR-AUC: 0.6339 | Recall: 0.6757 | MCC: 0.5691
+Epoca 07/20 | TrLoss: 0.4402 | ValLoss: 0.7311 | PR-AUC: 0.5851 | Recall: 0.7703 | MCC: 0.4794
+Epoca 08/20 | TrLoss: 0.3733 | ValLoss: 0.7701 | PR-AUC: 0.5767 | Recall: 0.7117 | MCC: 0.5623
+Epoca 09/20 | TrLoss: 0.3108 | ValLoss: 0.8570 | PR-AUC: 0.6337 | Recall: 0.6892 | MCC: 0.5488
+Epoca 10/20 | TrLoss: 0.2510 | ValLoss: 0.9526 | PR-AUC: 0.5978 | Recall: 0.6532 | MCC: 0.5414
+Epoca 11/20 | TrLoss: 0.2506 | ValLoss: 0.8878 | PR-AUC: 0.6084 | Recall: 0.7117 | MCC: 0.5688
+Epoca 12/20 | TrLoss: 0.2272 | ValLoss: 0.8904 | PR-AUC: 0.6130 | Recall: 0.6802 | MCC: 0.5652
+Epoca 13/20 | TrLoss: 0.1994 | ValLoss: 0.9553 | PR-AUC: 0.6289 | Recall: 0.6757 | MCC: 0.5592
+Epoca 14/20 | TrLoss: 0.1872 | ValLoss: 0.7763 | PR-AUC: 0.6375 | Recall: 0.7838 | MCC: 0.5149
+Epoca 15/20 | TrLoss: 0.1496 | ValLoss: 1.0798 | PR-AUC: 0.6515 | Recall: 0.6396 | MCC: 0.5683
+Epoca 16/20 | TrLoss: 0.1569 | ValLoss: 0.9139 | PR-AUC: 0.6538 | Recall: 0.7072 | MCC: 0.5791
+Epoca 17/20 | TrLoss: 0.1147 | ValLoss: 0.9923 | PR-AUC: 0.6604 | Recall: 0.6892 | MCC: 0.5731
+Epoca 18/20 | TrLoss: 0.1158 | ValLoss: 0.9730 | PR-AUC: 0.6615 | Recall: 0.7207 | MCC: 0.5929
+Epoca 19/20 | TrLoss: 0.0971 | ValLoss: 1.1700 | PR-AUC: 0.6268 | Recall: 0.6847 | MCC: 0.5713
+Epoca 20/20 | TrLoss: 0.1407 | ValLoss: 1.1391 | PR-AUC: 0.6438 | Recall: 0.6216 | MCC: 0.5365
+
+==================== Fold 3/5 ====================
+Epoca 01/20 | TrLoss: 1.1206 | ValLoss: 0.9461 | PR-AUC: 0.4897 | Recall: 0.9552 | MCC: 0.3196
+Epoca 02/20 | TrLoss: 0.8285 | ValLoss: 0.7575 | PR-AUC: 0.5656 | Recall: 0.8610 | MCC: 0.3847
+Epoca 03/20 | TrLoss: 0.6989 | ValLoss: 0.7121 | PR-AUC: 0.5981 | Recall: 0.8027 | MCC: 0.4552
+Epoca 04/20 | TrLoss: 0.6018 | ValLoss: 0.7164 | PR-AUC: 0.6029 | Recall: 0.7578 | MCC: 0.4861
+Epoca 05/20 | TrLoss: 0.5183 | ValLoss: 0.6951 | PR-AUC: 0.6133 | Recall: 0.8117 | MCC: 0.4684
+Epoca 06/20 | TrLoss: 0.4461 | ValLoss: 0.7261 | PR-AUC: 0.6333 | Recall: 0.8027 | MCC: 0.5001
+Epoca 07/20 | TrLoss: 0.4011 | ValLoss: 0.7272 | PR-AUC: 0.6401 | Recall: 0.8296 | MCC: 0.5417
+Epoca 08/20 | TrLoss: 0.3466 | ValLoss: 0.7419 | PR-AUC: 0.6573 | Recall: 0.7534 | MCC: 0.5675
+Epoca 09/20 | TrLoss: 0.3054 | ValLoss: 0.8290 | PR-AUC: 0.6708 | Recall: 0.7265 | MCC: 0.5946
+Epoca 10/20 | TrLoss: 0.2671 | ValLoss: 0.8068 | PR-AUC: 0.6671 | Recall: 0.7444 | MCC: 0.5565
+Epoca 11/20 | TrLoss: 0.2286 | ValLoss: 0.7494 | PR-AUC: 0.6689 | Recall: 0.8341 | MCC: 0.5636
+Epoca 12/20 | TrLoss: 0.2355 | ValLoss: 0.8278 | PR-AUC: 0.6794 | Recall: 0.7848 | MCC: 0.5822
+Epoca 13/20 | TrLoss: 0.1779 | ValLoss: 0.8573 | PR-AUC: 0.6573 | Recall: 0.7534 | MCC: 0.5808
+Epoca 14/20 | TrLoss: 0.1805 | ValLoss: 0.9492 | PR-AUC: 0.6680 | Recall: 0.7175 | MCC: 0.5996
+Epoca 15/20 | TrLoss: 0.1494 | ValLoss: 0.9530 | PR-AUC: 0.6730 | Recall: 0.7220 | MCC: 0.5846
+Epoca 16/20 | TrLoss: 0.1499 | ValLoss: 1.0585 | PR-AUC: 0.6679 | Recall: 0.7040 | MCC: 0.5857
+Epoca 17/20 | TrLoss: 0.1178 | ValLoss: 1.1171 | PR-AUC: 0.6681 | Recall: 0.7130 | MCC: 0.6022
+Epoca 18/20 | TrLoss: 0.1139 | ValLoss: 1.1750 | PR-AUC: 0.6685 | Recall: 0.6951 | MCC: 0.5998
+Epoca 19/20 | TrLoss: 0.1209 | ValLoss: 0.9638 | PR-AUC: 0.6477 | Recall: 0.8027 | MCC: 0.6027
+Epoca 20/20 | TrLoss: 0.1401 | ValLoss: 1.3490 | PR-AUC: 0.6846 | Recall: 0.6413 | MCC: 0.5946
+
+==================== Fold 4/5 ====================
+Epoca 01/20 | TrLoss: 1.1056 | ValLoss: 0.8924 | PR-AUC: 0.4316 | Recall: 0.9148 | MCC: 0.3258
+Epoca 02/20 | TrLoss: 0.8187 | ValLoss: 0.7880 | PR-AUC: 0.4955 | Recall: 0.8117 | MCC: 0.3906
+Epoca 03/20 | TrLoss: 0.7008 | ValLoss: 0.7463 | PR-AUC: 0.5509 | Recall: 0.8296 | MCC: 0.4269
+Epoca 04/20 | TrLoss: 0.6097 | ValLoss: 0.7314 | PR-AUC: 0.6058 | Recall: 0.7982 | MCC: 0.4715
+Epoca 05/20 | TrLoss: 0.5398 | ValLoss: 0.7149 | PR-AUC: 0.5986 | Recall: 0.8744 | MCC: 0.4383
+Epoca 06/20 | TrLoss: 0.4718 | ValLoss: 0.6858 | PR-AUC: 0.6137 | Recall: 0.8117 | MCC: 0.4930
+Epoca 07/20 | TrLoss: 0.4256 | ValLoss: 0.7318 | PR-AUC: 0.6432 | Recall: 0.7265 | MCC: 0.5326
+Epoca 08/20 | TrLoss: 0.3556 | ValLoss: 0.6972 | PR-AUC: 0.6082 | Recall: 0.8475 | MCC: 0.5127
+Epoca 09/20 | TrLoss: 0.3102 | ValLoss: 0.7221 | PR-AUC: 0.6159 | Recall: 0.8610 | MCC: 0.4869
+Epoca 10/20 | TrLoss: 0.2998 | ValLoss: 0.7251 | PR-AUC: 0.6471 | Recall: 0.8251 | MCC: 0.5537
+Epoca 11/20 | TrLoss: 0.2506 | ValLoss: 0.7728 | PR-AUC: 0.6561 | Recall: 0.7578 | MCC: 0.5446
+Epoca 12/20 | TrLoss: 0.2294 | ValLoss: 0.8295 | PR-AUC: 0.6413 | Recall: 0.7758 | MCC: 0.5291
+Epoca 13/20 | TrLoss: 0.2282 | ValLoss: 0.7699 | PR-AUC: 0.6698 | Recall: 0.8027 | MCC: 0.5504
+Epoca 14/20 | TrLoss: 0.1933 | ValLoss: 0.9178 | PR-AUC: 0.6613 | Recall: 0.7085 | MCC: 0.5697
+Epoca 15/20 | TrLoss: 0.1560 | ValLoss: 0.7970 | PR-AUC: 0.7044 | Recall: 0.7982 | MCC: 0.5972
+Epoca 16/20 | TrLoss: 0.1489 | ValLoss: 0.9164 | PR-AUC: 0.6987 | Recall: 0.7534 | MCC: 0.5845
+Epoca 17/20 | TrLoss: 0.1206 | ValLoss: 0.9188 | PR-AUC: 0.6737 | Recall: 0.7309 | MCC: 0.5590
+Epoca 18/20 | TrLoss: 0.1058 | ValLoss: 0.9006 | PR-AUC: 0.6882 | Recall: 0.7578 | MCC: 0.5966
+Epoca 19/20 | TrLoss: 0.0971 | ValLoss: 1.0763 | PR-AUC: 0.6764 | Recall: 0.7399 | MCC: 0.5476
+Epoca 20/20 | TrLoss: 0.0841 | ValLoss: 1.1703 | PR-AUC: 0.7127 | Recall: 0.7265 | MCC: 0.6222
+
+==================== Fold 5/5 ====================
+Epoca 01/20 | TrLoss: 1.1188 | ValLoss: 0.9506 | PR-AUC: 0.4333 | Recall: 0.9417 | MCC: 0.3200
+Epoca 02/20 | TrLoss: 0.8543 | ValLoss: 0.7583 | PR-AUC: 0.5512 | Recall: 0.8430 | MCC: 0.4007
+Epoca 03/20 | TrLoss: 0.7264 | ValLoss: 0.6987 | PR-AUC: 0.5855 | Recall: 0.8206 | MCC: 0.4461
+Epoca 04/20 | TrLoss: 0.6452 | ValLoss: 0.6944 | PR-AUC: 0.5944 | Recall: 0.8206 | MCC: 0.4648
+Epoca 05/20 | TrLoss: 0.5691 | ValLoss: 0.6275 | PR-AUC: 0.6419 | Recall: 0.8341 | MCC: 0.4968
+Epoca 06/20 | TrLoss: 0.4939 | ValLoss: 0.6483 | PR-AUC: 0.6465 | Recall: 0.7803 | MCC: 0.4979
+Epoca 07/20 | TrLoss: 0.4347 | ValLoss: 0.7423 | PR-AUC: 0.6580 | Recall: 0.7085 | MCC: 0.5027
+Epoca 08/20 | TrLoss: 0.3665 | ValLoss: 0.6860 | PR-AUC: 0.6305 | Recall: 0.8296 | MCC: 0.4907
+Epoca 09/20 | TrLoss: 0.3534 | ValLoss: 0.6935 | PR-AUC: 0.6203 | Recall: 0.7803 | MCC: 0.5282
+Epoca 10/20 | TrLoss: 0.2856 | ValLoss: 0.7516 | PR-AUC: 0.6499 | Recall: 0.7040 | MCC: 0.5424
+Epoca 11/20 | TrLoss: 0.2509 | ValLoss: 0.8214 | PR-AUC: 0.6425 | Recall: 0.7085 | MCC: 0.5407
+Epoca 12/20 | TrLoss: 0.2473 | ValLoss: 0.8278 | PR-AUC: 0.6791 | Recall: 0.7085 | MCC: 0.5657
+Epoca 13/20 | TrLoss: 0.1746 | ValLoss: 0.7861 | PR-AUC: 0.6754 | Recall: 0.7713 | MCC: 0.5823
+Epoca 14/20 | TrLoss: 0.1748 | ValLoss: 0.7991 | PR-AUC: 0.7074 | Recall: 0.7444 | MCC: 0.5859
+Epoca 15/20 | TrLoss: 0.1543 | ValLoss: 1.0052 | PR-AUC: 0.6794 | Recall: 0.6502 | MCC: 0.5567
+Epoca 16/20 | TrLoss: 0.1310 | ValLoss: 0.9485 | PR-AUC: 0.6927 | Recall: 0.6861 | MCC: 0.5757
+Epoca 17/20 | TrLoss: 0.1204 | ValLoss: 0.8523 | PR-AUC: 0.7187 | Recall: 0.7758 | MCC: 0.5760
+Epoca 18/20 | TrLoss: 0.1004 | ValLoss: 1.0323 | PR-AUC: 0.7054 | Recall: 0.7085 | MCC: 0.5644
+Epoca 19/20 | TrLoss: 0.1010 | ValLoss: 0.9847 | PR-AUC: 0.6911 | Recall: 0.7265 | MCC: 0.5440
+Epoca 20/20 | TrLoss: 0.0990 | ValLoss: 0.9300 | PR-AUC: 0.6930 | Recall: 0.7758 | MCC: 0.5474
+
+[COMPLETATO] Salvato in outputs/raw/metrics_HAM_raw_cnn.csv
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+=== TRAINING: HAM10000 | Image-Only Raw | MobileViT-S (Hybrid CNN+ViT) su cuda ===
+Dataset HAM10000 caricato: 10015 immagini valide.
+Distribuzione: Negativi=8902, Melanomi=1113
+
+==================== Fold 1/5 ====================
+Epoca 01/20 | TrLoss: 1.0001 | ValLoss: 0.8634 | PR-AUC: 0.5846 | Recall: 0.9505 | MCC: 0.3644
+Epoca 02/20 | TrLoss: 0.7408 | ValLoss: 0.7104 | PR-AUC: 0.6488 | Recall: 0.8468 | MCC: 0.4743
+Epoca 03/20 | TrLoss: 0.5936 | ValLoss: 0.6377 | PR-AUC: 0.6829 | Recall: 0.8198 | MCC: 0.5328
+Epoca 04/20 | TrLoss: 0.4769 | ValLoss: 0.6014 | PR-AUC: 0.6994 | Recall: 0.8649 | MCC: 0.5382
+Epoca 05/20 | TrLoss: 0.4037 | ValLoss: 0.6209 | PR-AUC: 0.6955 | Recall: 0.8063 | MCC: 0.5405
+Epoca 06/20 | TrLoss: 0.3247 | ValLoss: 0.6828 | PR-AUC: 0.7251 | Recall: 0.6847 | MCC: 0.6108
+Epoca 07/20 | TrLoss: 0.2641 | ValLoss: 0.6926 | PR-AUC: 0.6926 | Recall: 0.7477 | MCC: 0.5956
+Epoca 08/20 | TrLoss: 0.2189 | ValLoss: 0.6912 | PR-AUC: 0.7570 | Recall: 0.7297 | MCC: 0.6256
+Epoca 09/20 | TrLoss: 0.1830 | ValLoss: 0.6856 | PR-AUC: 0.7234 | Recall: 0.7973 | MCC: 0.6156
+Epoca 10/20 | TrLoss: 0.1750 | ValLoss: 0.7205 | PR-AUC: 0.7096 | Recall: 0.8153 | MCC: 0.5437
+Epoca 11/20 | TrLoss: 0.1259 | ValLoss: 0.8813 | PR-AUC: 0.7206 | Recall: 0.7162 | MCC: 0.5720
+Epoca 12/20 | TrLoss: 0.1353 | ValLoss: 0.7067 | PR-AUC: 0.7523 | Recall: 0.8108 | MCC: 0.6299
+Epoca 13/20 | TrLoss: 0.1105 | ValLoss: 0.8301 | PR-AUC: 0.7546 | Recall: 0.7523 | MCC: 0.6309
+Epoca 14/20 | TrLoss: 0.1020 | ValLoss: 0.7927 | PR-AUC: 0.7467 | Recall: 0.7793 | MCC: 0.6296
+Epoca 15/20 | TrLoss: 0.0829 | ValLoss: 0.9181 | PR-AUC: 0.7220 | Recall: 0.7027 | MCC: 0.6018
+Epoca 16/20 | TrLoss: 0.0706 | ValLoss: 1.0771 | PR-AUC: 0.7420 | Recall: 0.6667 | MCC: 0.6573
+Epoca 17/20 | TrLoss: 0.0776 | ValLoss: 0.8523 | PR-AUC: 0.7447 | Recall: 0.7613 | MCC: 0.6241
+Epoca 18/20 | TrLoss: 0.0696 | ValLoss: 0.8615 | PR-AUC: 0.7205 | Recall: 0.8018 | MCC: 0.6087
+Epoca 19/20 | TrLoss: 0.0552 | ValLoss: 1.2065 | PR-AUC: 0.7240 | Recall: 0.6622 | MCC: 0.6328
+Epoca 20/20 | TrLoss: 0.0509 | ValLoss: 1.0531 | PR-AUC: 0.7360 | Recall: 0.7207 | MCC: 0.6550
+
+==================== Fold 2/5 ====================
+Epoca 01/20 | TrLoss: 0.9978 | ValLoss: 0.8031 | PR-AUC: 0.5751 | Recall: 0.8739 | MCC: 0.4287
+Epoca 02/20 | TrLoss: 0.7408 | ValLoss: 0.7323 | PR-AUC: 0.6388 | Recall: 0.7973 | MCC: 0.4959
+Epoca 03/20 | TrLoss: 0.6246 | ValLoss: 0.7345 | PR-AUC: 0.6526 | Recall: 0.8333 | MCC: 0.5027
+Epoca 04/20 | TrLoss: 0.5013 | ValLoss: 0.7160 | PR-AUC: 0.6722 | Recall: 0.6937 | MCC: 0.5667
+Epoca 05/20 | TrLoss: 0.3790 | ValLoss: 0.6823 | PR-AUC: 0.7041 | Recall: 0.6847 | MCC: 0.5934
+Epoca 06/20 | TrLoss: 0.3142 | ValLoss: 0.6536 | PR-AUC: 0.7261 | Recall: 0.7793 | MCC: 0.5755
+Epoca 07/20 | TrLoss: 0.2766 | ValLoss: 0.7213 | PR-AUC: 0.6614 | Recall: 0.7297 | MCC: 0.5528
+Epoca 08/20 | TrLoss: 0.2021 | ValLoss: 0.6555 | PR-AUC: 0.7245 | Recall: 0.7793 | MCC: 0.6045
+Epoca 09/20 | TrLoss: 0.1815 | ValLoss: 0.9733 | PR-AUC: 0.7145 | Recall: 0.5586 | MCC: 0.5913
+Epoca 10/20 | TrLoss: 0.1182 | ValLoss: 0.9848 | PR-AUC: 0.7143 | Recall: 0.6171 | MCC: 0.6150
+Epoca 11/20 | TrLoss: 0.1381 | ValLoss: 0.8969 | PR-AUC: 0.7231 | Recall: 0.6712 | MCC: 0.6027
+Epoca 12/20 | TrLoss: 0.1332 | ValLoss: 1.0174 | PR-AUC: 0.7334 | Recall: 0.6036 | MCC: 0.6130
+Epoca 13/20 | TrLoss: 0.0950 | ValLoss: 0.9875 | PR-AUC: 0.7371 | Recall: 0.6306 | MCC: 0.5986
+Epoca 14/20 | TrLoss: 0.0855 | ValLoss: 1.1474 | PR-AUC: 0.7469 | Recall: 0.6261 | MCC: 0.6487
+Epoca 15/20 | TrLoss: 0.1038 | ValLoss: 1.1674 | PR-AUC: 0.7200 | Recall: 0.5901 | MCC: 0.6028
+Epoca 16/20 | TrLoss: 0.1005 | ValLoss: 0.7873 | PR-AUC: 0.7555 | Recall: 0.8378 | MCC: 0.6200
+Epoca 17/20 | TrLoss: 0.0819 | ValLoss: 0.9308 | PR-AUC: 0.7520 | Recall: 0.6622 | MCC: 0.5994
+Epoca 18/20 | TrLoss: 0.0871 | ValLoss: 1.0718 | PR-AUC: 0.7485 | Recall: 0.6261 | MCC: 0.6237
+Epoca 19/20 | TrLoss: 0.0569 | ValLoss: 1.2239 | PR-AUC: 0.7652 | Recall: 0.6261 | MCC: 0.6575
+Epoca 20/20 | TrLoss: 0.0689 | ValLoss: 1.1359 | PR-AUC: 0.7447 | Recall: 0.6622 | MCC: 0.6442
+
+==================== Fold 3/5 ====================
+Epoca 01/20 | TrLoss: 1.0104 | ValLoss: 0.8077 | PR-AUC: 0.5984 | Recall: 0.9148 | MCC: 0.3690
+Epoca 02/20 | TrLoss: 0.7420 | ValLoss: 0.6922 | PR-AUC: 0.6758 | Recall: 0.8789 | MCC: 0.4733
+Epoca 03/20 | TrLoss: 0.5852 | ValLoss: 0.6380 | PR-AUC: 0.6979 | Recall: 0.8475 | MCC: 0.4995
+Epoca 04/20 | TrLoss: 0.4768 | ValLoss: 0.6125 | PR-AUC: 0.7151 | Recall: 0.8834 | MCC: 0.5029
+Epoca 05/20 | TrLoss: 0.3872 | ValLoss: 0.6297 | PR-AUC: 0.7322 | Recall: 0.8117 | MCC: 0.6017
+Epoca 06/20 | TrLoss: 0.3103 | ValLoss: 0.5821 | PR-AUC: 0.7518 | Recall: 0.8789 | MCC: 0.5672
+Epoca 07/20 | TrLoss: 0.2813 | ValLoss: 0.6142 | PR-AUC: 0.7628 | Recall: 0.7982 | MCC: 0.6284
+Epoca 08/20 | TrLoss: 0.2333 | ValLoss: 0.8263 | PR-AUC: 0.6971 | Recall: 0.6637 | MCC: 0.5833
+Epoca 09/20 | TrLoss: 0.1904 | ValLoss: 0.6756 | PR-AUC: 0.7352 | Recall: 0.7892 | MCC: 0.6019
+Epoca 10/20 | TrLoss: 0.2197 | ValLoss: 0.8270 | PR-AUC: 0.7595 | Recall: 0.6906 | MCC: 0.6612
+Epoca 11/20 | TrLoss: 0.1565 | ValLoss: 0.7854 | PR-AUC: 0.7329 | Recall: 0.7220 | MCC: 0.6461
+Epoca 12/20 | TrLoss: 0.1334 | ValLoss: 0.8176 | PR-AUC: 0.7632 | Recall: 0.7354 | MCC: 0.6675
+Epoca 13/20 | TrLoss: 0.1304 | ValLoss: 0.7948 | PR-AUC: 0.7683 | Recall: 0.7623 | MCC: 0.6743
+Epoca 14/20 | TrLoss: 0.0932 | ValLoss: 0.8590 | PR-AUC: 0.7379 | Recall: 0.7489 | MCC: 0.6488
+Epoca 15/20 | TrLoss: 0.0982 | ValLoss: 0.7782 | PR-AUC: 0.7389 | Recall: 0.8027 | MCC: 0.6275
+Epoca 16/20 | TrLoss: 0.1047 | ValLoss: 1.0373 | PR-AUC: 0.7324 | Recall: 0.6726 | MCC: 0.6176
+Epoca 17/20 | TrLoss: 0.0942 | ValLoss: 0.9386 | PR-AUC: 0.7684 | Recall: 0.7489 | MCC: 0.6856
+Epoca 18/20 | TrLoss: 0.0697 | ValLoss: 0.8252 | PR-AUC: 0.7759 | Recall: 0.8565 | MCC: 0.6402
+Epoca 19/20 | TrLoss: 0.1663 | ValLoss: 0.7459 | PR-AUC: 0.7486 | Recall: 0.8969 | MCC: 0.5666
+Epoca 20/20 | TrLoss: 0.0745 | ValLoss: 0.9271 | PR-AUC: 0.7507 | Recall: 0.7489 | MCC: 0.6472
+
+==================== Fold 4/5 ====================
+Epoca 01/20 | TrLoss: 1.0153 | ValLoss: 0.8269 | PR-AUC: 0.5560 | Recall: 0.9596 | MCC: 0.3481
+Epoca 02/20 | TrLoss: 0.7490 | ValLoss: 0.7127 | PR-AUC: 0.6901 | Recall: 0.9372 | MCC: 0.4144
+Epoca 03/20 | TrLoss: 0.6205 | ValLoss: 0.6215 | PR-AUC: 0.7311 | Recall: 0.8610 | MCC: 0.4992
+Epoca 04/20 | TrLoss: 0.4832 | ValLoss: 0.6437 | PR-AUC: 0.7545 | Recall: 0.7309 | MCC: 0.6134
+Epoca 05/20 | TrLoss: 0.3696 | ValLoss: 0.5531 | PR-AUC: 0.7912 | Recall: 0.8700 | MCC: 0.5741
+Epoca 06/20 | TrLoss: 0.3225 | ValLoss: 0.6326 | PR-AUC: 0.7881 | Recall: 0.7578 | MCC: 0.6614
+Epoca 07/20 | TrLoss: 0.2585 | ValLoss: 0.6955 | PR-AUC: 0.7605 | Recall: 0.6996 | MCC: 0.6319
+Epoca 08/20 | TrLoss: 0.2109 | ValLoss: 0.8123 | PR-AUC: 0.7778 | Recall: 0.7175 | MCC: 0.6655
+Epoca 09/20 | TrLoss: 0.2010 | ValLoss: 0.8860 | PR-AUC: 0.7897 | Recall: 0.6592 | MCC: 0.6817
+Epoca 10/20 | TrLoss: 0.1596 | ValLoss: 0.6709 | PR-AUC: 0.7882 | Recall: 0.8251 | MCC: 0.6351
+Epoca 11/20 | TrLoss: 0.1297 | ValLoss: 0.7511 | PR-AUC: 0.8029 | Recall: 0.7758 | MCC: 0.6886
+Epoca 12/20 | TrLoss: 0.1193 | ValLoss: 0.7793 | PR-AUC: 0.7875 | Recall: 0.7758 | MCC: 0.6675
+Epoca 13/20 | TrLoss: 0.1155 | ValLoss: 0.7281 | PR-AUC: 0.7662 | Recall: 0.7713 | MCC: 0.6274
+Epoca 14/20 | TrLoss: 0.0958 | ValLoss: 1.1626 | PR-AUC: 0.7649 | Recall: 0.6368 | MCC: 0.6678
+Epoca 15/20 | TrLoss: 0.1099 | ValLoss: 0.7629 | PR-AUC: 0.8009 | Recall: 0.7758 | MCC: 0.6853
+Epoca 16/20 | TrLoss: 0.0810 | ValLoss: 0.7252 | PR-AUC: 0.8136 | Recall: 0.7982 | MCC: 0.6844
+Epoca 17/20 | TrLoss: 0.0618 | ValLoss: 0.9336 | PR-AUC: 0.8024 | Recall: 0.7220 | MCC: 0.6949
+Epoca 18/20 | TrLoss: 0.0618 | ValLoss: 0.8972 | PR-AUC: 0.8080 | Recall: 0.7668 | MCC: 0.7356
+Epoca 19/20 | TrLoss: 0.0549 | ValLoss: 0.8562 | PR-AUC: 0.7826 | Recall: 0.8072 | MCC: 0.6827
+Epoca 20/20 | TrLoss: 0.0509 | ValLoss: 1.0142 | PR-AUC: 0.8215 | Recall: 0.7354 | MCC: 0.7328
+
+==================== Fold 5/5 ====================
+Epoca 01/20 | TrLoss: 0.9987 | ValLoss: 0.8116 | PR-AUC: 0.6049 | Recall: 0.9327 | MCC: 0.3930
+Epoca 02/20 | TrLoss: 0.7416 | ValLoss: 0.7386 | PR-AUC: 0.6478 | Recall: 0.8341 | MCC: 0.4744
+Epoca 03/20 | TrLoss: 0.6151 | ValLoss: 0.6529 | PR-AUC: 0.6783 | Recall: 0.8251 | MCC: 0.5424
+Epoca 04/20 | TrLoss: 0.5199 | ValLoss: 0.6010 | PR-AUC: 0.7254 | Recall: 0.7713 | MCC: 0.5871
+Epoca 05/20 | TrLoss: 0.3978 | ValLoss: 0.5953 | PR-AUC: 0.7139 | Recall: 0.8072 | MCC: 0.5741
+Epoca 06/20 | TrLoss: 0.3283 | ValLoss: 0.5925 | PR-AUC: 0.7069 | Recall: 0.8027 | MCC: 0.5764
+Epoca 07/20 | TrLoss: 0.2694 | ValLoss: 0.7139 | PR-AUC: 0.7234 | Recall: 0.7578 | MCC: 0.5992
+Epoca 08/20 | TrLoss: 0.2594 | ValLoss: 0.5784 | PR-AUC: 0.7413 | Recall: 0.8430 | MCC: 0.5686
+Epoca 09/20 | TrLoss: 0.1987 | ValLoss: 0.7679 | PR-AUC: 0.6736 | Recall: 0.8565 | MCC: 0.5046
+Epoca 10/20 | TrLoss: 0.1728 | ValLoss: 0.8009 | PR-AUC: 0.7288 | Recall: 0.7040 | MCC: 0.6301
+Epoca 11/20 | TrLoss: 0.1718 | ValLoss: 0.6827 | PR-AUC: 0.7633 | Recall: 0.7668 | MCC: 0.6371
+Epoca 12/20 | TrLoss: 0.1711 | ValLoss: 0.7421 | PR-AUC: 0.7231 | Recall: 0.6996 | MCC: 0.6046
+Epoca 13/20 | TrLoss: 0.1121 | ValLoss: 0.7375 | PR-AUC: 0.7674 | Recall: 0.7668 | MCC: 0.6342
+Epoca 14/20 | TrLoss: 0.1002 | ValLoss: 0.7940 | PR-AUC: 0.7588 | Recall: 0.7444 | MCC: 0.6703
+Epoca 15/20 | TrLoss: 0.0794 | ValLoss: 0.9911 | PR-AUC: 0.7559 | Recall: 0.6502 | MCC: 0.6339
+Epoca 16/20 | TrLoss: 0.0795 | ValLoss: 1.0010 | PR-AUC: 0.7301 | Recall: 0.7578 | MCC: 0.6338
+Epoca 17/20 | TrLoss: 0.1063 | ValLoss: 0.7198 | PR-AUC: 0.7801 | Recall: 0.7758 | MCC: 0.6597
+Epoca 18/20 | TrLoss: 0.0839 | ValLoss: 0.8512 | PR-AUC: 0.7901 | Recall: 0.7265 | MCC: 0.6700
+Epoca 19/20 | TrLoss: 0.0675 | ValLoss: 0.8965 | PR-AUC: 0.7683 | Recall: 0.7130 | MCC: 0.6534
+Epoca 20/20 | TrLoss: 0.0643 | ValLoss: 0.7329 | PR-AUC: 0.7576 | Recall: 0.8117 | MCC: 0.6185
+
+[COMPLETATO] Salvato in outputs/raw/metrics_HAM_raw_hybrid.csv
