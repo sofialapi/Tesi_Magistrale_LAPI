@@ -83,6 +83,7 @@ def main():
     val_tf = BCNTransform(is_training=False)
 
     criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+    scaler = torch.amp.GradScaler('cuda')
     history_records = []
     global_best_auc = 0.0
 
@@ -98,7 +99,6 @@ def main():
 
         model = get_model(args.arch).to(device)
         optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-2)
-        scaler = torch.amp.GradScaler('cuda')
         best_pr_auc_fold = 0.0
 
         for epoch in range(1, args.epochs + 1):
@@ -110,7 +110,12 @@ def main():
                 with torch.amp.autocast('cuda'):
                     outputs = model(imgs)
                     loss = criterion(outputs, targets)
+                
                 scaler.scale(loss).backward()
+                
+                scaler.unscale_(optimizer)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=5.0)
+                
                 scaler.step(optimizer)
                 scaler.update()
                 tr_loss += loss.item() * imgs.size(0)
@@ -126,7 +131,9 @@ def main():
                         outputs = model(imgs)
                         loss = criterion(outputs, targets)
                     val_loss += loss.item() * imgs.size(0)
-                    preds.extend(torch.sigmoid(outputs).cpu().numpy().flatten())
+                    batch_preds = torch.sigmoid(outputs)
+                    batch_preds = torch.nan_to_num(batch_preds, nan=0.0)
+                    preds.extend(batch_preds.cpu().numpy().flatten())
                     true_labels.extend(targets.cpu().numpy().flatten())
 
             val_loss /= len(val_loader.dataset)

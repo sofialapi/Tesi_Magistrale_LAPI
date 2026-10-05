@@ -107,7 +107,13 @@ def main():
                 with torch.amp.autocast('cuda'):
                     outputs = model(imgs)
                     loss = criterion(outputs, targets)
+                
                 scaler.scale(loss).backward()
+                
+                # Stabilizzazione numerica gradienti per VGG (evita overflow NaN in AMP)
+                scaler.unscale_(optimizer)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=5.0)
+                
                 scaler.step(optimizer)
                 scaler.update()
                 tr_loss += loss.item() * imgs.size(0)
@@ -123,7 +129,9 @@ def main():
                         outputs = model(imgs)
                         loss = criterion(outputs, targets)
                     val_loss += loss.item() * imgs.size(0)
-                    preds.extend(torch.sigmoid(outputs).cpu().numpy().flatten())
+                    batch_preds = torch.sigmoid(outputs)
+                    batch_preds = torch.nan_to_num(batch_preds, nan=0.0)
+                    preds.extend(batch_preds.cpu().numpy().flatten())
                     true_labels.extend(targets.cpu().numpy().flatten())
 
             val_loss /= len(val_loader.dataset)
