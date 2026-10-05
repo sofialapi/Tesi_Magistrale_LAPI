@@ -1,0 +1,155 @@
+
+==============================================================================
+1. CHECKPOINT ISIC 2024
+==============================================================================
+  best_cnn_only_fold1.pth                2026-09-29 16:13  OrderedDict, 327 tensori | n_output=2
+  best_cnn_only_fold2.pth                2026-09-29 16:23  OrderedDict, 327 tensori | n_output=2
+  best_cnn_only_fold3.pth                2026-09-29 16:40  OrderedDict, 327 tensori | n_output=2
+  best_cnn_only_fold4.pth                2026-09-29 16:57  OrderedDict, 327 tensori | n_output=2
+  best_cnn_only_fold5.pth                2026-09-29 17:12  OrderedDict, 327 tensori | n_output=2
+  best_hybrid_only_fold1.pth             2026-09-29 17:29  OrderedDict, 318 tensori | n_output=2
+  best_hybrid_only_fold2.pth             2026-09-29 17:46  OrderedDict, 318 tensori | n_output=2
+  best_hybrid_only_fold3.pth             2026-09-29 18:01  OrderedDict, 318 tensori | n_output=2
+  best_hybrid_only_fold4.pth             2026-09-29 18:12  OrderedDict, 318 tensori | n_output=2
+  best_hybrid_only_fold5.pth             2026-09-29 18:23  OrderedDict, 318 tensori | n_output=2
+  best_cnn_multimodal_fold1.pth          2026-09-29 18:51  OrderedDict, 341 tensori | clinical_dim=11 | n_output=2
+  best_cnn_multimodal_fold2.pth          2026-09-29 19:03  OrderedDict, 341 tensori | clinical_dim=11 | n_output=2
+  best_cnn_multimodal_fold3.pth          2026-09-29 19:24  OrderedDict, 341 tensori | clinical_dim=11 | n_output=2
+  best_cnn_multimodal_fold4.pth          2026-09-29 19:41  OrderedDict, 341 tensori | clinical_dim=11 | n_output=2
+  best_cnn_multimodal_fold5.pth          2026-09-29 19:55  OrderedDict, 341 tensori | clinical_dim=11 | n_output=2
+  best_hybrid_multimodal_fold1.pth       2026-09-29 20:09  OrderedDict, 332 tensori | clinical_dim=11 | n_output=2
+  best_hybrid_multimodal_fold2.pth       2026-09-29 20:20  OrderedDict, 332 tensori | clinical_dim=11 | n_output=2
+  best_hybrid_multimodal_fold3.pth       2026-09-29 20:31  OrderedDict, 332 tensori | clinical_dim=11 | n_output=2
+  best_hybrid_multimodal_fold4.pth       2026-09-29 20:47  OrderedDict, 332 tensori | clinical_dim=11 | n_output=2
+  best_hybrid_multimodal_fold5.pth       2026-09-29 21:00  OrderedDict, 332 tensori | clinical_dim=11 | n_output=2
+
+  Altri .pth nella cartella (naming diverso):
+    best_cnn_bcn20000.pth                    2026-09-28 16:14
+    best_cnn_fold1.pth                       2026-09-28 16:14
+    best_cnn_fold2.pth                       2026-09-28 17:31
+    best_cnn_fold3.pth                       2026-09-28 18:41
+    best_cnn_fold4.pth                       2026-09-28 20:05
+    best_cnn_fold5.pth                       2026-09-28 21:16
+    best_cnn_ham10000.pth                    2026-10-01 16:47
+    best_hybrid_bcn20000.pth                 2026-09-28 16:09
+    best_hybrid_fold1.pth                    2026-09-28 16:09
+    best_hybrid_fold2.pth                    2026-09-28 17:21
+    best_hybrid_fold3.pth                    2026-09-28 18:25
+    best_hybrid_fold4.pth                    2026-09-28 19:55
+    best_hybrid_fold5.pth                    2026-09-28 21:11
+    best_hybrid_ham10000.pth                 2026-10-02 00:56
+    best_hybrid_ham10000_fold1.pth           2026-10-01 23:38
+    best_hybrid_ham10000_fold2.pth           2026-10-02 00:56
+    best_hybrid_ham10000_fold3.pth           2026-10-02 02:10
+    best_hybrid_ham10000_fold4.pth           2026-10-02 03:47
+    best_hybrid_ham10000_fold5.pth           2026-10-02 05:06
+
+==============================================================================
+2. IL PROCESSOR VIENE SALVATO?
+==============================================================================
+  XAI_NL/nl_selftest.py:100: json.dump({"segmentazione": seg, "descrittori": features,
+  XAI_NL/nl_run_explain.py:318: json.dump(record, f, ensure_ascii=False, indent=1, default=float)
+  XAI_NL/nl_explainer.py:125: json.dump(result, f, ensure_ascii=False, indent=1)
+  File serializzati in outputs/: nessuno
+
+==============================================================================
+3. CSV DEI METADATI
+==============================================================================
+  /mnt/sdb1/workspace/sofialapi/Tesi_Magistrale_LAPI/data/raw/ISIC/metadata_isic_subset.csv  (modificato: 2026-09-08 15:05)
+  Righe: 10393 | Colonne: 55
+  Target: {0: 10000, 1: 393}
+  [num] age_approx             mancanti=   70  min=15.000  mediana=60.000  max=85.000
+  [num] tbp_lv_symm_2axis      mancanti=    0  min=0.076  mediana=0.285  max=0.898
+  [num] tbp_lv_eccentricity    mancanti=    0  min=0.101  mediana=0.769  max=0.975
+  [num] tbp_lv_areaMM2         mancanti=    0  min=0.544  mediana=5.742  max=221.974
+  [cat] sex                    {'male': 6859, 'female': 3226, nan: 308}
+  [cat] anatom_site_general    {'posterior torso': 3135, 'lower extremity': 2565, 'anterior torso': 2328, 'upper extremity': 1833, 'head/neck': 391, nan: 141}
+
+==============================================================================
+4. RICOSTRUZIONE DEL PROCESSOR PER FOLD (stesso split di train.py)
+==============================================================================
+[VIF FILTER] Feature numeriche finali trattenute: ['age_approx', 'tbp_lv_symm_2axis', 'tbp_lv_eccentricity', 'tbp_lv_areaMM2']
+  Fold 1: train=8314 val=2079 (maligni val=79)
+           dim=11 | numeriche=['age_approx', 'tbp_lv_symm_2axis', 'tbp_lv_eccentricity', 'tbp_lv_areaMM2']
+           feature: ['age_approx', 'tbp_lv_symm_2axis', 'tbp_lv_eccentricity', 'tbp_lv_areaMM2', 'sex_female', 'sex_male', 'anatom_site_general_anterior torso', 'anatom_site_general_head/neck', 'anatom_site_general_lower extremity', 'anatom_site_general_posterior torso', 'anatom_site_general_upper extremity']
+           confronto checkpoint -> cnn_multimodal: OK | hybrid_multimodal: OK
+[VIF FILTER] Feature numeriche finali trattenute: ['age_approx', 'tbp_lv_symm_2axis', 'tbp_lv_eccentricity', 'tbp_lv_areaMM2']
+  Fold 2: train=8314 val=2079 (maligni val=79)
+           dim=11 | numeriche=['age_approx', 'tbp_lv_symm_2axis', 'tbp_lv_eccentricity', 'tbp_lv_areaMM2']
+           feature: ['age_approx', 'tbp_lv_symm_2axis', 'tbp_lv_eccentricity', 'tbp_lv_areaMM2', 'sex_female', 'sex_male', 'anatom_site_general_anterior torso', 'anatom_site_general_head/neck', 'anatom_site_general_lower extremity', 'anatom_site_general_posterior torso', 'anatom_site_general_upper extremity']
+           confronto checkpoint -> cnn_multimodal: OK | hybrid_multimodal: OK
+[VIF FILTER] Feature numeriche finali trattenute: ['age_approx', 'tbp_lv_symm_2axis', 'tbp_lv_eccentricity', 'tbp_lv_areaMM2']
+  Fold 3: train=8314 val=2079 (maligni val=79)
+           dim=11 | numeriche=['age_approx', 'tbp_lv_symm_2axis', 'tbp_lv_eccentricity', 'tbp_lv_areaMM2']
+           feature: ['age_approx', 'tbp_lv_symm_2axis', 'tbp_lv_eccentricity', 'tbp_lv_areaMM2', 'sex_female', 'sex_male', 'anatom_site_general_anterior torso', 'anatom_site_general_head/neck', 'anatom_site_general_lower extremity', 'anatom_site_general_posterior torso', 'anatom_site_general_upper extremity']
+           confronto checkpoint -> cnn_multimodal: OK | hybrid_multimodal: OK
+[VIF FILTER] Feature numeriche finali trattenute: ['age_approx', 'tbp_lv_symm_2axis', 'tbp_lv_eccentricity', 'tbp_lv_areaMM2']
+  Fold 4: train=8315 val=2078 (maligni val=78)
+           dim=11 | numeriche=['age_approx', 'tbp_lv_symm_2axis', 'tbp_lv_eccentricity', 'tbp_lv_areaMM2']
+           feature: ['age_approx', 'tbp_lv_symm_2axis', 'tbp_lv_eccentricity', 'tbp_lv_areaMM2', 'sex_female', 'sex_male', 'anatom_site_general_anterior torso', 'anatom_site_general_head/neck', 'anatom_site_general_lower extremity', 'anatom_site_general_posterior torso', 'anatom_site_general_upper extremity']
+           confronto checkpoint -> cnn_multimodal: OK | hybrid_multimodal: OK
+[VIF FILTER] Feature numeriche finali trattenute: ['age_approx', 'tbp_lv_symm_2axis', 'tbp_lv_eccentricity', 'tbp_lv_areaMM2']
+  Fold 5: train=8315 val=2078 (maligni val=78)
+           dim=11 | numeriche=['age_approx', 'tbp_lv_symm_2axis', 'tbp_lv_eccentricity', 'tbp_lv_areaMM2']
+           feature: ['age_approx', 'tbp_lv_symm_2axis', 'tbp_lv_eccentricity', 'tbp_lv_areaMM2', 'sex_female', 'sex_male', 'anatom_site_general_anterior torso', 'anatom_site_general_head/neck', 'anatom_site_general_lower extremity', 'anatom_site_general_posterior torso', 'anatom_site_general_upper extremity']
+           confronto checkpoint -> cnn_multimodal: OK | hybrid_multimodal: OK
+
+==============================================================================
+5. CSV DELLE METRICHE
+==============================================================================
+
+  metrics_bcn_cnn.csv  (modificato: 2026-09-28 21:18)  shape=(100, 7)
+  colonne: ['fold', 'epoch', 'train_loss', 'val_loss', 'pr_auc', 'recall', 'mcc']
+ fold  epoch  train_loss  val_loss   pr_auc   recall      mcc
+    1      1    0.959023  0.814775 0.603693 0.695122 0.433091
+    1      2    0.804857  0.729404 0.672172 0.788248 0.450262
+    1      3    0.755024  0.718082 0.695512 0.699557 0.519866
+
+  metrics_bcn_hybrid.csv  (modificato: 2026-09-28 21:15)  shape=(100, 7)
+  colonne: ['fold', 'epoch', 'train_loss', 'val_loss', 'pr_auc', 'recall', 'mcc']
+ fold  epoch  train_loss  val_loss   pr_auc   recall      mcc
+    1      1    0.881481  0.725453 0.694150 0.809313 0.479415
+    1      2    0.713275  0.641936 0.760226 0.845898 0.523594
+    1      3    0.652010  0.644577 0.756932 0.749446 0.564661
+
+  metrics_cnn_only.csv  (modificato: 2026-09-29 17:21)  shape=(97, 6)
+  colonne: ['fold', 'epoch', 'train_loss', 'val_loss', 'pr_auc', 'recall']
+ fold  epoch  train_loss  val_loss  pr_auc  recall
+    1      1      0.1113    0.1128  0.1246  0.6962
+    1      2      0.0721    0.0370  0.2577  0.4810
+    1      3      0.0566    0.0435  0.3623  0.6582
+
+  metrics_ham10000_cnn.csv  (modificato: 2026-10-01 18:44)  shape=(100, 7)
+  colonne: ['fold', 'epoch', 'train_loss', 'val_loss', 'pr_auc', 'recall', 'mcc']
+ fold  epoch  train_loss  val_loss   pr_auc   recall      mcc
+    1      1    0.996649  0.772287 0.536236 0.852018 0.388238
+    1      2    0.773643  0.694386 0.583828 0.744395 0.489506
+    1      3    0.694304  0.671876 0.622393 0.771300 0.541154
+
+  metrics_ham10000_hybrid.csv  (modificato: 2026-10-02 05:57)  shape=(100, 7)
+  colonne: ['fold', 'epoch', 'train_loss', 'val_loss', 'pr_auc', 'recall', 'mcc']
+ fold  epoch  train_loss  val_loss   pr_auc   recall      mcc
+    1      1    0.928929  0.768636 0.562852 0.901345 0.418399
+    1      2    0.752295  0.680713 0.634134 0.829596 0.481653
+    1      3    0.673071  0.862537 0.603367 0.560538 0.549348
+
+  metrics_hybrid_multimodal.csv  (modificato: 2026-09-29 21:05)  shape=(84, 6)
+  colonne: ['fold', 'epoch', 'train_loss', 'val_loss', 'pr_auc', 'recall']
+ fold  epoch  train_loss  val_loss  pr_auc  recall
+    1      1      0.0840    0.0576  0.2195  0.4810
+    1      2      0.0564    0.0304  0.4293  0.6203
+    1      3      0.0432    0.0297  0.5104  0.6709
+
+  metrics_hybrid_only.csv  (modificato: 2026-09-29 18:29)  shape=(84, 6)
+  colonne: ['fold', 'epoch', 'train_loss', 'val_loss', 'pr_auc', 'recall']
+ fold  epoch  train_loss  val_loss  pr_auc  recall
+    1      1      0.0908    0.0680  0.1776  0.4810
+    1      2      0.0573    0.0443  0.3777  0.6835
+    1      3      0.0450    0.0231  0.3984  0.5190
+
+  metrics_multimodal.csv  (modificato: 2026-09-29 20:01)  shape=(120, 6)
+  colonne: ['fold', 'epoch', 'train_loss', 'val_loss', 'pr_auc', 'recall']
+ fold  epoch  train_loss  val_loss  pr_auc  recall
+    1      1      0.0896    0.0579  0.1581  0.3797
+    1      2      0.0684    0.0380  0.2858  0.4557
+    1      3      0.0555    0.0500  0.2388  0.4684
