@@ -83,6 +83,7 @@ def render_case_figure(out_path, panel_rgb, overlay_rgb, cams, mask, info,
   sections:    sintesi, resnet50, mobilevit_s, confronto, avvertenze (lista)
   """
   pw = (FIG_W - 2 * MARGIN - 2 * GAP) / 3
+  ph = pw * panel_rgb.shape[0] / panel_rgb.shape[1]  # rispetta le proporzioni
   xs = [MARGIN + i * (pw + GAP) for i in range(3)]
 
   # ---- testo: misura dei blocchi ----
@@ -110,7 +111,7 @@ def render_case_figure(out_path, panel_rgb, overlay_rgb, cams, mask, info,
   h_row1 = max(b["height"] for b in row1)
   h_row2 = max(b["height"] for b in row2)
   h_foot = len(foot_lines) * 7.5 * 1.4 / 72
-  H = top + title_h + pw + gap1 + h_row1 + gap2 + h_row2 + gap3 + h_foot + bottom
+  H = top + title_h + ph + gap1 + h_row1 + gap2 + h_row2 + gap3 + h_foot + bottom
 
   fig = plt.figure(figsize=(FIG_W, H), facecolor="white")
 
@@ -132,7 +133,7 @@ def render_case_figure(out_path, panel_rgb, overlay_rgb, cams, mask, info,
             overlay_cam(overlay_rgb, cams["mobilevit_s"])]
 
   for i in range(3):
-    ax = fig.add_axes([xs[i] / FIG_W, 1 - (y_img + pw) / H, pw / FIG_W, pw / H])
+    ax = fig.add_axes([xs[i] / FIG_W, 1 - (y_img + ph) / H, pw / FIG_W, ph / H])
     ax.imshow(images[i])
     if show_contour and mask is not None and mask.any():
       ax.contour(mask.astype(float), levels=[0.5], colors="white",
@@ -142,7 +143,7 @@ def render_case_figure(out_path, panel_rgb, overlay_rgb, cams, mask, info,
     ax.axis("off")
 
   # ---- testo ----
-  y = y_img + pw + gap1
+  y = y_img + ph + gap1
   _hline(fig, H, y - gap1 / 2)
   for i, b in enumerate(row1):
     _draw_block(fig, H, xs[i], y, b)

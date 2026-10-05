@@ -33,3 +33,6 @@ Thumbs.db
 outputs/vgg/checkpoints/
 outputs/vgg/*.log
 outputs/vgg/*.err
+__pycache__/
+*.pyc
+outputs/xai_nl/cache/

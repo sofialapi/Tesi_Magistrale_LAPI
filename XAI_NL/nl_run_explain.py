@@ -1,28 +1,37 @@
 """Spiegazioni in linguaggio naturale delle mappe Grad-CAM++ (BCN20000 e HAM10000).
 
-Da lanciare dalla root del progetto (Tesi_Magistrale_LAPI):
+Da lanciare dalla root del progetto (~/Tesi_Magistrale_LAPI).
 
-  # casi delle figure 6.1 e 6.2 della tesi
-  python -m XAI_NL.nl_run_explain --dataset bcn --ids ISIC_0000002
+  # 3 melanomi + 3 benigni dal fold di validazione di default (BCN: 1, HAM: 4)
+  python -m XAI_NL.nl_run_explain --dataset bcn --num_samples 6
+  python -m XAI_NL.nl_run_explain --dataset ham --num_samples 6
+
+  # ID specifici: ogni immagine viene spiegata dai checkpoint del fold in cui
+  # e' di validazione (se disponibili)
   python -m XAI_NL.nl_run_explain --dataset ham --ids ISIC_0028086
 
-  # 3 melanomi + 3 benigni casuali dal fold di validazione
-  python -m XAI_NL.nl_run_explain --dataset ham --fold 1 --num_samples 6
+  # forzare un fold (gli ID fuori da quel fold vengono marcati "training")
+  python -m XAI_NL.nl_run_explain --dataset bcn --ids ISIC_0000002 --fold 1
 
-  # senza API (testo da template): utile per controllare figure e descrittori
-  python -m XAI_NL.nl_run_explain --dataset ham --ids ISIC_0028086 --no_llm
+  # stessi casi con i modelli addestrati dagli script raw (Sezione 6.1.3)
+  python -m XAI_NL.nl_run_explain --dataset ham_raw --ids ISIC_0028086
+
+  # senza API (testo da template)
+  python -m XAI_NL.nl_run_explain --dataset ham --num_samples 6 --no_llm
 """
 import argparse
 import csv
 import json
 import os
 
+import cv2
 import numpy as np
 import pandas as pd
+from PIL import Image
 
 from .nl_cam_features import compute_case_features, rule_warnings, segment_lesion
-from .nl_config import (DATASETS, FIGURE_DIR, LLM_MODEL, MODEL_KEYS,
-                        OUTPUT_DIR)
+from .nl_config import (DATASETS, FEATURE_SIZE, FIGURE_DIR, LLM_MODEL, MODEL_KEYS,
+                        OUTPUT_DIR, available_folds, resolve_checkpoint)
 from .nl_explainer import GroqExplainer, TemplateExplainer
 from .nl_figure import render_case_figure
 from .nl_verify import verify_explanation
@@ -34,20 +43,14 @@ TARGET_COLS = ("target", "MEL", "label")
 def parse_args():
   ap = argparse.ArgumentParser(description="Grad-CAM++ + spiegazione NL (GPT-OSS-20B)")
   ap.add_argument("--dataset", required=True, choices=sorted(DATASETS))
-  ap.add_argument("--csv")
-  ap.add_argument("--processed_dir", help="immagini preelaborate (input dei modelli)")
-  ap.add_argument("--raw_dir", help="immagini originali (pannello per il clinico)")
-  ap.add_argument("--cnn_ckpt")
-  ap.add_argument("--hybrid_ckpt")
-  ap.add_argument("--threshold", type=float, default=0.5)
   ap.add_argument("--ids", nargs="+", help="ID specifici (es. ISIC_0028086)")
-  ap.add_argument("--fold", type=int, help="fold di validazione del checkpoint")
-  ap.add_argument("--fold_col", default="fold")
+  ap.add_argument("--fold", type=int, help="fold dei checkpoint (default da config)")
   ap.add_argument("--num_samples", type=int, default=6)
   ap.add_argument("--selection", choices=["random", "first"], default="random")
   ap.add_argument("--seed", type=int, default=42)
-  ap.add_argument("--overlay_on", choices=["processed", "raw"], default="processed",
-                  help="immagine su cui sovrapporre le mappe")
+  ap.add_argument("--threshold", type=float, default=0.5)
+  ap.add_argument("--overlay_on", choices=["input", "display"], default="input",
+                  help="mappe sovrapposte all'input del modello o all'immagine mostrata")
   ap.add_argument("--no_llm", action="store_true", help="usa il template a regole")
   ap.add_argument("--llm_model", default=LLM_MODEL)
   ap.add_argument("--reasoning_effort", choices=["low", "medium", "high"],
@@ -60,6 +63,9 @@ def parse_args():
   return ap.parse_args()
 
 
+# ----------------------------------------------------------------------------
+# Dati e fold
+# ----------------------------------------------------------------------------
 def normalize_id(x):
   s = os.path.basename(str(x))
   if s.lower().endswith((".jpg", ".jpeg", ".png")):
@@ -71,10 +77,9 @@ def build_index(root):
   idx = {}
   if not root or not os.path.isdir(root):
     return idx
-  for dp, _, files in os.walk(root):
-    for f in files:
-      if f.lower().endswith((".jpg", ".jpeg", ".png")):
-        idx.setdefault(normalize_id(f), os.path.join(dp, f))
+  for f in os.listdir(root):
+    if f.lower().endswith((".jpg", ".jpeg", ".png")):
+      idx.setdefault(normalize_id(f), os.path.join(root, f))
   return idx
 
 
@@ -83,7 +88,7 @@ def detect_columns(df):
   if id_col is None:
     raise KeyError(f"Nessuna colonna ID tra {ID_COLS}: {list(df.columns)}")
   tgt = next((c for c in TARGET_COLS if c in df.columns), None)
-  if tgt is None and "dx" in df.columns:
+  if tgt is None and "dx" in df.columns:  # HAM10000_metadata.csv
     df["target"] = (df["dx"] == "mel").astype(int)
     tgt = "target"
   if tgt is None:
@@ -91,63 +96,114 @@ def detect_columns(df):
   return id_col, tgt
 
 
-def select_samples(df, args, id_col, tgt, proc_idx):
+def rebuild_kfold(df, img_dir, seed, id_col, tgt, tag):
+  """Replica gli script di training: mappatura file, dropna, StratifiedKFold."""
+  from sklearn.model_selection import StratifiedKFold
+  existing = {f: os.path.join(img_dir, f) for f in os.listdir(img_dir)
+              if f.endswith(".jpg")}
+  paths = []
+  for name in df[id_col]:
+    base = str(name).replace(".jpg", "")
+    cands = [f"{base}.jpg", f"{base}_downsampled.jpg",
+             base.replace("_downsampled", "") + ".jpg"]
+    paths.append(next((existing[c] for c in cands if c in existing), None))
   df = df.copy()
+  df["filepath"] = paths
+  initial = len(df)
+  df = df.dropna(subset=["filepath"]).reset_index(drop=True)
+  skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=seed)
+  df["fold"] = 0
+  for k, (_, val_idx) in enumerate(skf.split(df, df[tgt]), start=1):
+    df.loc[val_idx, "fold"] = k
+  print(f"[{tag}] fold ricostruiti su {len(df)} di {initial} righe del CSV "
+        "(deve coincidere con il numero di campioni stampato dal training).")
+  print(f"[{tag}] campioni di validazione per fold: "
+        + ", ".join(f"{k}={int((df['fold'] == k).sum())}" for k in range(1, 6)))
+  return df
+
+
+def load_dataframe(cfg, seed):
+  df = pd.read_csv(cfg["csv"])
+  id_col, tgt = detect_columns(df)
+  if cfg["folds"] == "stratified_kfold":
+    df = rebuild_kfold(df, cfg["input_dir"], cfg.get("kfold_seed", seed),
+                       id_col, tgt, cfg["name"])
+  elif "fold" not in df.columns:
+    raise KeyError("Colonna 'fold' assente nel CSV")
   df["_id"] = df[id_col].map(normalize_id)
-  df = df[df["_id"].isin(proc_idx)]  # solo casi con immagine preelaborata
+  df["_target"] = df[tgt].astype(int)
+  df["fold"] = df["fold"].astype(int)
+  return df
+
+
+def select_samples(df, args, fold, input_idx):
+  df = df[df["_id"].isin(input_idx)]
   if args.ids:
     wanted = [normalize_id(i) for i in args.ids]
-    sel = df[df["_id"].isin(wanted)]
+    sel = df[df["_id"].isin(wanted)].drop_duplicates("_id")
     missing = sorted(set(wanted) - set(sel["_id"]))
     if missing:
-      print(f"[AVVISO] ID non trovati (CSV o immagini preelaborate): {missing}")
-    return sel.drop_duplicates("_id")
-
-  if args.fold is not None:
-    if args.fold_col in df.columns:
-      df = df[df[args.fold_col] == args.fold]
-    else:
-      print(f"[AVVISO] colonna '{args.fold_col}' assente: impossibile filtrare il fold.")
-  else:
-    print("[AVVISO] nessun fold indicato: i casi potrebbero appartenere al "
-          "training set del checkpoint. Per la tesi usa --fold o --ids di validazione.")
-
+      print(f"[AVVISO] ID non trovati nel CSV o tra le immagini: {missing}")
+    return sel
+  df = df[df["fold"] == fold]
   n_mal = args.num_samples // 2
-  mal, ben = df[df[tgt] == 1], df[df[tgt] == 0]
+  mal, ben = df[df["_target"] == 1], df[df["_target"] == 0]
   if args.selection == "random":
     mal = mal.sample(min(n_mal, len(mal)), random_state=args.seed)
-    ben = ben.sample(min(args.num_samples - len(mal), len(ben)), random_state=args.seed)
+    ben = ben.sample(min(args.num_samples - len(mal), len(ben)),
+                     random_state=args.seed)
   else:
     mal = mal.head(n_mal)
     ben = ben.head(args.num_samples - len(mal))
   return pd.concat([mal, ben])
 
 
+# ----------------------------------------------------------------------------
+# Main
+# ----------------------------------------------------------------------------
 def main():
   args = parse_args()
-  cfg = dict(DATASETS[args.dataset])
-  for k in ("csv", "processed_dir", "raw_dir", "cnn_ckpt", "hybrid_ckpt"):
-    if getattr(args, k):
-      cfg[k] = getattr(args, k)
-  if args.fold is None and not args.ids:
-    args.fold = cfg["default_fold"]
-
+  cfg = DATASETS[args.dataset]
   fig_dir = args.figure_dir or os.path.join(FIGURE_DIR, args.dataset)
   out_dir = args.output_dir or os.path.join(OUTPUT_DIR, args.dataset)
   os.makedirs(fig_dir, exist_ok=True)
   os.makedirs(out_dir, exist_ok=True)
+
+  input_idx = build_index(cfg["input_dir"])
+  display_idx = build_index(cfg["display_dir"])
+  print(f"Immagini indicizzate: {len(input_idx)} input, {len(display_idx)} display")
+  if not input_idx:
+    raise SystemExit(f"Nessuna immagine in {cfg['input_dir']}")
+
+  df = load_dataframe(cfg, args.seed)
+  forced_fold = args.fold
+  default_fold = args.fold or cfg["default_fold"]
+  samples = select_samples(df, args, default_fold, input_idx)
+  if samples.empty:
+    raise SystemExit("Nessun caso selezionato.")
 
   # import qui: torch serve solo per l'esecuzione completa
   import torch
   from .nl_models import CamRunner, load_rgb, to_tensor
 
   device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-  runners = {
-      "resnet50": CamRunner("resnet50", cfg["cnn_ckpt"], device),
-      "mobilevit_s": CamRunner("mobilevit_s", cfg["hybrid_ckpt"], device),
-  }
-  for k, r in runners.items():
-    print(f"[{k}] target layer Grad-CAM++: {r.target_layer_name}")
+  runners_cache = {}
+
+  def get_runners(fold):
+    if fold not in runners_cache:
+      ck = {"resnet50": resolve_checkpoint(cfg["cnn_ckpt"], fold),
+            "mobilevit_s": resolve_checkpoint(cfg["hybrid_ckpt"], fold)}
+      if any(p is None or not os.path.exists(p) for p in ck.values()):
+        runners_cache[fold] = None
+      else:
+        runners_cache[fold] = {
+            "resnet50": CamRunner("resnet50", ck["resnet50"], device),
+            "mobilevit_s": CamRunner("mobilevit_s", ck["mobilevit_s"], device),
+            "ckpt": ck}
+        for k in MODEL_KEYS:
+          print(f"[fold {fold}] {k}: {ck[k]} | target layer "
+                f"{runners_cache[fold][k].target_layer_name}")
+    return runners_cache[fold]
 
   if args.no_llm:
     explainer = TemplateExplainer()
@@ -156,33 +212,47 @@ def main():
         model=args.llm_model, reasoning_effort=args.reasoning_effort,
         temperature=args.temperature,
         cache_dir=os.path.join(OUTPUT_DIR, "cache"))
-
-  proc_idx = build_index(cfg["processed_dir"])
-  raw_idx = build_index(cfg["raw_dir"])
-  print(f"Immagini indicizzate: {len(proc_idx)} preelaborate, {len(raw_idx)} raw")
-  if not proc_idx:
-    raise SystemExit(f"Nessuna immagine in {cfg['processed_dir']}")
-
-  df = pd.read_csv(cfg["csv"])
-  id_col, tgt = detect_columns(df)
-  samples = select_samples(df, args, id_col, tgt, proc_idx)
-  print(f"Casi selezionati: {len(samples)} | soglia tau={args.threshold} | "
+  print(f"Casi selezionati: {len(samples)} | tau={args.threshold} | "
         f"explainer={explainer.name}")
 
   summary = []
   for n, (_, row) in enumerate(samples.iterrows(), start=1):
-    img_id = row["_id"]
-    gt = "Melanoma" if int(row[tgt]) == 1 else "Benigno"
-    proc = load_rgb(proc_idx[img_id])
-    raw = load_rgb(raw_idx[img_id]) if img_id in raw_idx else None
-    tensor = to_tensor(proc, device)
+    img_id, img_fold = row["_id"], int(row["fold"])
+    gt = "Melanoma" if row["_target"] == 1 else "Benigno"
+    ck_fold = forced_fold if forced_fold is not None else (
+        img_fold if args.ids else default_fold)
+    runners = get_runners(ck_fold)
+    if runners is None:
+      print(f"[{img_id}] e' nel fold {img_fold}, ma mancano i checkpoint di quel "
+            f"fold (ResNet-50 disponibile per i fold "
+            f"{available_folds(cfg['cnn_ckpt'])}). Usa --fold <k> per forzare: "
+            "l'immagine verra' marcata come training. Caso saltato.")
+      continue
+    split = "validazione" if img_fold == ck_fold else "training"
 
+    # input identico al val_tf del training (risoluzione nativa se input_size None)
+    inp = load_rgb(input_idx[img_id], cfg["input_size"])
+    h, w = inp.shape[:2]
+    disp = inp
+    if img_id in display_idx and display_idx[img_id] != input_idx[img_id]:
+      disp = np.asarray(Image.fromarray(load_rgb(display_idx[img_id], None))
+                        .resize((w, h), Image.BILINEAR))
+    tensor = to_tensor(inp, device)
     probs, cams = {}, {}
     for k in MODEL_KEYS:
       probs[k], cams[k] = runners[k](tensor)
 
-    mask, seg_info = segment_lesion(proc)
-    features = compute_case_features(proc, mask, seg_info, cams, probs,
+    # descrittori sempre a FEATURE_SIZE x FEATURE_SIZE (soglie confrontabili)
+    fs = FEATURE_SIZE
+    inp_f = inp if (h, w) == (fs, fs) else np.asarray(
+        Image.fromarray(inp).resize((fs, fs), Image.BILINEAR))
+    cams_f = {k: c if c.shape == (fs, fs) else
+              cv2.resize(c, (fs, fs), interpolation=cv2.INTER_AREA)
+              for k, c in cams.items()}
+    mask_f, seg_info = segment_lesion(inp_f)
+    mask = mask_f if (h, w) == (fs, fs) else cv2.resize(
+        mask_f.astype(np.uint8), (w, h), interpolation=cv2.INTER_NEAREST).astype(bool)
+    features = compute_case_features(inp_f, mask_f, seg_info, cams_f, probs,
                                      args.threshold, cfg["name"])
     warns = rule_warnings(features)
     features["avvertenze_calcolate"] = [w["testo"] for w in warns]
@@ -195,10 +265,13 @@ def main():
     sec = expl["sezioni"]
     ver = verify_explanation(sec, features, warns)
 
-    # le avvertenze a regole omesse dall'LLM vengono comunque mostrate
+    # avvertenze a regole omesse dall'LLM: mostrate comunque
     missing = set(ver["avvertenze_mancanti"])
     extra = [w["testo"] for w in warns
              if (w["codice"] + (f"@{w['modello']}" if w["modello"] else "")) in missing]
+    if split == "training":
+      extra.insert(0, f"Immagine del fold {img_fold}, usata nel TRAINING dei "
+                      f"checkpoint del fold {ck_fold}: spiegazione non rappresentativa.")
 
     info = {
         "image_id": img_id, "ground_truth": gt, "soglia": args.threshold,
@@ -207,25 +280,31 @@ def main():
     }
     src = ("GPT-OSS-20B (Groq)" if expl["meta"]["explainer"] == "llm"
            else "template a regole")
-    overlay_img = raw if (args.overlay_on == "raw" and raw is not None) else proc
+    overlay_img = disp if args.overlay_on == "display" else inp
+    input_desc = cfg["input_desc"]
+    overlay_desc = ("all'immagine del primo pannello" if args.overlay_on == "display"
+                    else "all'input del modello")
     footer = (
         f"Spiegazione generata automaticamente ({src}) a partire da descrittori "
         "quantitativi delle mappe Grad-CAM++; non costituisce una diagnosi. "
-        f"Mappe sovrapposte all'immagine {'originale' if overlay_img is raw else 'preelaborata'}"
-        " fornita ai modelli. Contorno tratteggiato: segmentazione automatica "
-        "della lesione usata per i descrittori. Dataset: "
-        f"{cfg['name']}. La ground truth non e' fornita al generatore di testo."
+        f"Input dei modelli: {input_desc}. Mappe sovrapposte "
+        f"{overlay_desc}. "
+        "Contorno tratteggiato: segmentazione automatica usata per i descrittori. "
+        f"{cfg['name']}, checkpoint del fold {ck_fold}, immagine di {split}. "
+        "La ground truth non e' fornita al generatore di testo."
     )
     stem = f"{args.dataset}_nl_gradcam_{n:02d}_{img_id}_{gt}"
     fig_path = os.path.join(fig_dir, stem + ".png")
-    render_case_figure(
-        fig_path, raw if raw is not None else proc, overlay_img, cams, mask,
-        info, sec, extra_warnings=extra, footer=footer, dpi=args.dpi,
-        show_contour=not args.no_contour)
+    render_case_figure(fig_path, disp, overlay_img, cams, mask, info, sec,
+                       extra_warnings=extra, footer=footer, dpi=args.dpi,
+                       show_contour=not args.no_contour)
 
     record = {
         "image_id": img_id, "ground_truth": gt, "dataset": cfg["name"],
-        "checkpoint": {"resnet50": cfg["cnn_ckpt"], "mobilevit_s": cfg["hybrid_ckpt"]},
+        "fold_immagine": img_fold, "fold_checkpoint": ck_fold, "split": split,
+        "checkpoint": runners["ckpt"],
+        "input": {"file": input_idx[img_id], "dimensione_hw": [h, w],
+                  "descrizione": input_desc},
         "target_layer": {k: runners[k].target_layer_name for k in MODEL_KEYS},
         "segmentazione": seg_info,
         "descrittori_inviati": features,
@@ -240,7 +319,8 @@ def main():
 
     m = features["modelli"]
     summary.append({
-        "image_id": img_id, "ground_truth": gt,
+        "image_id": img_id, "ground_truth": gt, "fold_immagine": img_fold,
+        "fold_checkpoint": ck_fold, "split": split,
         "p_resnet50": round(probs["resnet50"], 4),
         "esito_resnet50": m["resnet50"]["predizione"]["esito"],
         "p_mobilevit_s": round(probs["mobilevit_s"], 4),
@@ -259,9 +339,9 @@ def main():
         "token_totali": (expl["meta"].get("token") or {}).get("totale"),
         "figura": fig_path,
     })
-    print(f"[{n}/{len(samples)}] {img_id} ({gt}) -> ResNet {probs['resnet50']:.3f}, "
-          f"MobileViT {probs['mobilevit_s']:.3f} | verifica "
-          f"{'OK' if ver['superata'] else 'NON superata'} | {fig_path}")
+    print(f"[{n}/{len(samples)}] {img_id} ({gt}, fold {img_fold}, {split}) -> "
+          f"ResNet {probs['resnet50']:.3f}, MobileViT {probs['mobilevit_s']:.3f} | "
+          f"verifica {'OK' if ver['superata'] else 'NON superata'} | {fig_path}")
 
   if summary:
     path = os.path.join(out_dir, f"{args.dataset}_nl_summary.csv")

@@ -1,8 +1,8 @@
 """Caricamento dei modelli, preparazione dell'input e calcolo di Grad-CAM++."""
 import os
 
-import cv2
 import numpy as np
+from PIL import Image
 from pytorch_grad_cam import GradCAMPlusPlus
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
 import timm
@@ -43,20 +43,16 @@ def load_model(arch, checkpoint_path, device):
 
 
 def load_rgb(path, size=IMG_SIZE):
-  """Legge un'immagine come RGB uint8 alla risoluzione dei modelli.
+  """Legge l'immagine esattamente come il val_tf dei training.
 
-  Le immagini preelaborate sono gia' state ridimensionate in fase di
-  preprocessing; se non lo sono si usa l'interpolazione bilineare di OpenCV,
-  la stessa del training (Sezione 2.2.2). Il filtro gaussiano NON viene
-  riapplicato: si assume gia' presente nelle immagini di data/processed.
+  Image.open(...).convert("RGB"), poi transforms.Resize((size, size)) se
+  size non e' None (su immagini PIL equivale al resize bilineare di Pillow).
+  size=None mantiene la risoluzione nativa (DermalAugmentor di HAM).
   """
-  bgr = cv2.imread(path, cv2.IMREAD_COLOR)
-  if bgr is None:
-    raise IOError(f"Impossibile leggere {path}")
-  rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
-  if rgb.shape[:2] != (size, size):
-    rgb = cv2.resize(rgb, (size, size), interpolation=cv2.INTER_LINEAR)
-  return rgb
+  img = Image.open(path).convert("RGB")
+  if size is not None and img.size != (size, size):
+    img = img.resize((size, size), Image.BILINEAR)
+  return np.asarray(img, dtype=np.uint8).copy()
 
 
 def to_tensor(rgb_uint8, device):
