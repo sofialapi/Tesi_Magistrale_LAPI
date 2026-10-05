@@ -296,7 +296,7 @@ def cam_descriptors(cam, mask, lab):
     if da > 4:
       colore.append("tonalita' piu' rossastra")
     if not colore:
-      colore.append("colore simile al resto della lesione")
+      colore.append("di colore simile")
 
   d.update({
       "energia_dentro_lesione_pct": _pct((cam * mask).sum() / total),
@@ -384,7 +384,8 @@ def rule_warnings(features):
     en = mp.get("energia_dentro_lesione_pct")
     if en is not None and en < 100 * MIN_LESION_ENERGY:
       out.append({"codice": "FUORI_LESIONE", "modello": k,
-                  "testo": f"{name}: solo il {en}% dell'attivazione cade sulla "
+                  "testo": f"{name}: " + ("nessuna parte" if en == 0 else f"solo il {en}%")
+                           + " dell'attivazione cade sulla "
                            "lesione; la predizione potrebbe basarsi su elementi "
                            "non clinicamente rilevanti."})
     elif mp.get("zona_picco") in ("cute perilesionale", "cute distante dalla lesione"):

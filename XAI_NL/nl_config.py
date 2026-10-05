@@ -9,7 +9,7 @@ un dizionario {fold: percorso} elenca i soli fold disponibili.
 
 # --- LLM ---------------------------------------------------------------------
 LLM_MODEL = "openai/gpt-oss-20b"
-PROMPT_VERSION = "v1"  # cambiala quando modifichi il prompt: invalida la cache
+PROMPT_VERSION = "v2"  # cambiala quando modifichi il prompt: invalida la cache
 
 # --- Input dei modelli (identico al val_tf dei training) ----------------------
 # PIL .convert("RGB") [+ transforms.Resize((224, 224))] + Normalize(ImageNet)

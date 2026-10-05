@@ -5,10 +5,25 @@ Controlli:
 - avvertenze calcolate a regole non riportate dal testo;
 - termini dermoscopici vietati (strutture non misurate);
 - superamento dei limiti di parole.
+Controlli di stile (non bloccanti): troppi numeri per sezione, gergo tecnico.
+
+I numeri sono confrontati con i soli descrittori inviati all'LLM (llm_view).
 """
 import re
 
 from .nl_config import WORD_LIMITS
+from .nl_prompts import llm_view
+
+MAX_NUMBERS_PER_SECTION = 2
+_JARGON = {
+    "IoU": r"\biou\b",
+    "CIELAB": r"cielab|[\u0394\u03b4]\s?[lab]\b|delta[_ ]?[lab]\b",
+    "energia": r"\benergi\w*",
+    "regione/area calda": r"\b(regione|area|zona)\s+cald\w*",
+    "correlazione": r"\bcorrelazion\w*",
+    "copertura": r"\bcopertur\w*",
+    "pixel": r"\bpixel\b",
+}
 
 # Pattern che contengono cifre ma non sono valori da verificare
 _IGNORE = re.compile(
@@ -57,10 +72,20 @@ def _collect_numbers(obj, out):
 
 
 def _matches(x, allowed):
+  """x (numero citato) corrisponde a un descrittore, a meno del segno.
+
+  Il segno viene ignorato perche' il testo puo' usare il meno tipografico.
+  La conversione percentuale/frazione vale solo nei casi sensati
+  (90.7 <-> 0.907, 0.24 <-> 24), non per numeri piccoli contro zero.
+  """
+  ax = abs(x)
   for v in allowed:
-    if abs(x - v) <= max(0.006, 0.01 * abs(v)):
+    av = abs(v)
+    if abs(ax - av) <= max(0.006, 0.01 * av):
       return True
-    if abs(x - 100 * v) <= 0.6 or abs(x / 100 - v) <= 0.006:  # % vs frazione
+    if ax >= 1 and av < 1 and abs(ax - 100 * av) <= 0.6:
+      return True
+    if ax < 1 and av >= 1 and abs(100 * ax - av) <= 0.6:
       return True
   return False
 
@@ -71,7 +96,7 @@ def _words(s):
 
 def verify_explanation(sections, features, rule_warns):
   allowed = []
-  _collect_numbers(features, allowed)
+  _collect_numbers(llm_view(features), allowed)
   allowed += [224.0]
 
   full_text = " ".join([sections[k] for k in sections if k != "avvertenze"]
@@ -102,8 +127,20 @@ def verify_explanation(sections, features, rule_warns):
   superati += [f"avvertenza_{i+1}" for i, a in enumerate(sections["avvertenze"])
                if _words(a) > WORD_LIMITS["avvertenza"] * 1.2]
 
+  # --- stile (non bloccante) ---
+  numeri_per_sezione = {
+      k: len(_NUM.findall(_IGNORE.sub(" ", sections[k])))
+      for k in sections if k != "avvertenze"}
+  troppi_numeri = [k for k, n in numeri_per_sezione.items()
+                   if n > MAX_NUMBERS_PER_SECTION]
+  gergo = [name for name, pat in _JARGON.items() if re.search(pat, low)]
+
   return {
       "numeri_citati": len(numeri),
+      "numeri_per_sezione": numeri_per_sezione,
+      "troppi_numeri": troppi_numeri,
+      "gergo_tecnico": gergo,
+      "stile_ok": not (troppi_numeri or gergo or superati),
       "numeri_non_verificati": non_verificati,
       "termini_vietati": vietati,
       "avvertenze_mancanti": mancanti,
