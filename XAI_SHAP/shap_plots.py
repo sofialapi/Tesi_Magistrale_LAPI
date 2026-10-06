@@ -152,16 +152,19 @@ def fig_dependence(data):
 
 
 def fig_categorical(data):
+    """Boxplot SHAP per categoria; sotto ogni categoria, numerosità e tasso empirico di malignità."""
     cases = list(data)
-    fig, axes = plt.subplots(1, len(cfg.CAT_VARS), figsize=(5 + 2.5 * (len(cfg.CAT_VARS) - 1), 3.4),
-                             gridspec_kw={"width_ratios": [1, 2.4]})
+    missing = "n.d."
+    fig, axes = plt.subplots(1, len(cfg.CAT_VARS), figsize=(11, 4.0), gridspec_kw={"width_ratios": [1, 2.3]})
     w = 0.8 / len(cases)
+    ref = data[cases[0]]
     for ax, var in zip(axes, cfg.CAT_VARS):
-        cats = data[cases[0]][f"val_{var}"].fillna("mancante (imputato)").value_counts().index.tolist()
+        lab_ref = ref[f"val_{var}"].fillna(missing)
+        cats = [c for c in lab_ref.value_counts().index if c != missing] + ([missing] if (lab_ref == missing).any() else [])
         x = np.arange(len(cats))
         for k, case in enumerate(cases):
             d = data[case]
-            lab = d[f"val_{var}"].fillna("mancante (imputato)")
+            lab = d[f"val_{var}"].fillna(missing)
             groups = [d.loc[lab == cat, f"phi_{var}"].to_numpy() for cat in cats]
             pos = x + (k - (len(cases) - 1) / 2) * w
             bp = ax.boxplot(groups, positions=pos, widths=w * 0.85, patch_artist=True, showfliers=False,
@@ -170,13 +173,17 @@ def fig_categorical(data):
             for patch in bp["boxes"]:
                 patch.set(facecolor=cfg.CASE_COLORS[case], alpha=0.75, edgecolor=MUTED)
             ax.plot([], [], "s", color=cfg.CASE_COLORS[case], label=cfg.CASES[case]["short"])
-        counts = data[cases[0]][f"val_{var}"].fillna("mancante (imputato)").value_counts()
-        ax.set_xticks(x, [f"{cfg.CAT_LABELS.get(c, c)}\n(n={counts[c]})" for c in cats], fontsize=8)
+        ticks = []
+        for c in cats:
+            m = lab_ref == c
+            name = "n.d. (imputato)" if c == missing else cfg.CAT_LABELS.get(c, c)
+            ticks.append(f"{name}\nn={m.sum()}\n{ref.loc[m, 'target'].mean():.1%} mal.")
+        ax.set_xticks(x, ticks, fontsize=7.5)
         ax.axhline(0, color=MUTED, lw=0.7)
         ax.set_title(cfg.VAR_LABELS[var])
         ax.grid(axis="x", visible=False)
-    axes[0].set_ylabel(f"valore SHAP ({LOGIT})")
-    axes[-1].legend(frameon=False, fontsize=8)
+    axes[0].set_ylabel("valore SHAP\n(contributo al log-odds di malignità)")
+    axes[-1].legend(frameon=False, fontsize=8, loc="upper left")
     fig.tight_layout()
     save(fig, "shap_categoriali.png")
 
@@ -224,7 +231,7 @@ def fig_modality(data, folds):
     a2.set_ylabel("PR-AUC (media sui 5 fold)")
     a2.set_title("Ablazione per marginalizzazione")
     a2.grid(axis="x", visible=False)
-    a2.legend(frameon=False, fontsize=8)
+    a2.legend(frameon=False, fontsize=8, loc="upper center", bbox_to_anchor=(0.5, -0.13), ncol=3)
     fig.tight_layout()
     save(fig, "shap_modalita.png")
 
@@ -334,6 +341,9 @@ def main():
                   f"  PR-AUC senza immagine   {f.prauc_img_marginalized.mean():.4f} ± {f.prauc_img_marginalized.std(ddof=1):.4f}",
                   f"  |SHAP| medio immagine   {d.phi_img.abs().mean():.4f}   clinica {d.phi_tab.abs().mean():.4f}"
                   f"   (quota clinica {share:.1%})",
+                  f"  Decisioni a soglia 0.5 (senza clinica -> con clinica): maligne individuate "
+                  f"{((d.base_tab >= 0) & (d.target == 1)).sum()} -> {((d.logit >= 0) & (d.target == 1)).sum()} su {int(d.target.sum())}, "
+                  f"falsi positivi {((d.base_tab >= 0) & (d.target == 0)).sum()} -> {((d.logit >= 0) & (d.target == 0)).sum()}",
                   f"  Errore max proiezione {f.max_err_projection.max():.1e} | efficienza {f.max_err_efficiency.max():.1e}",
                   "  Importanza (media |SHAP| ± ds tra fold):"]
         for _, r in imp[imp.case == case].sort_values("mean_abs_phi", ascending=False).iterrows():

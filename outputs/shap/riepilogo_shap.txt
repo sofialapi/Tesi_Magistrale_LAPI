@@ -5,6 +5,7 @@ RIEPILOGO SHAP - ISIC 2024 (output spiegato: log-odds di malignità)
   PR-AUC senza clinica    0.4449 ± 0.0404
   PR-AUC senza immagine   0.1588 ± 0.0439
   |SHAP| medio immagine   1.1236   clinica 0.3331   (quota clinica 22.9%)
+  Decisioni a soglia 0.5 (senza clinica -> con clinica): maligne individuate 158 -> 195 su 393, falsi positivi 168 -> 197
   Errore max proiezione 9.5e-07 | efficienza 4.2e-15
   Importanza (media |SHAP| ± ds tra fold):
     Eccentricità           0.2116 ± 0.0489
@@ -19,6 +20,7 @@ RIEPILOGO SHAP - ISIC 2024 (output spiegato: log-odds di malignità)
   PR-AUC senza clinica    0.4429 ± 0.0583
   PR-AUC senza immagine   0.1570 ± 0.0736
   |SHAP| medio immagine   0.8308   clinica 0.2436   (quota clinica 22.7%)
+  Decisioni a soglia 0.5 (senza clinica -> con clinica): maligne individuate 130 -> 153 su 393, falsi positivi 93 -> 120
   Errore max proiezione 9.5e-07 | efficienza 3.6e-15
   Importanza (media |SHAP| ± ds tra fold):
     Eccentricità           0.1408 ± 0.0357
