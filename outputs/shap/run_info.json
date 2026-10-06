@@ -1,0 +1,44 @@
+{
+ "background_size": 200,
+ "background_seed": 1234,
+ "folds": [
+  1,
+  2,
+  3,
+  4,
+  5
+ ],
+ "variables": [
+  "age_approx",
+  "tbp_lv_symm_2axis",
+  "tbp_lv_eccentricity",
+  "tbp_lv_areaMM2",
+  "sex",
+  "anatom_site_general"
+ ],
+ "output": "log-odds z1 - z0",
+ "cnn_multimodal": {
+  "fold": 3.0,
+  "n_val": 2078.6,
+  "n_pos": 78.6,
+  "prauc_csv_best_epoch": 0.48762,
+  "prauc_full": 0.49386895911948586,
+  "prauc_tab_marginalized": 0.44487801295454615,
+  "prauc_img_marginalized": 0.15879419004206613,
+  "v_none": -3.1320461251027885,
+  "max_err_projection": 9.5367431640625e-07,
+  "max_err_efficiency": 3.579775365025739e-15
+ },
+ "hybrid_multimodal": {
+  "fold": 3.0,
+  "n_val": 2078.6,
+  "n_pos": 78.6,
+  "prauc_csv_best_epoch": 0.46714,
+  "prauc_full": 0.47086608799683266,
+  "prauc_tab_marginalized": 0.4429335945608514,
+  "prauc_img_marginalized": 0.1569675082234207,
+  "v_none": -2.9199185997173194,
+  "max_err_projection": 9.5367431640625e-07,
+  "max_err_efficiency": 2.864375403532904e-15
+ }
+}

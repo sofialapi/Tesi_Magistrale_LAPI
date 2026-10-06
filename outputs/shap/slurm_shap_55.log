@@ -1,0 +1,62 @@
+Python: /mnt/sdb1/workspace/sofialapi/venv_tesi/bin/python | GPU: 0 | inizio: mar 6 ott 2026, 05:57:44, CEST
+Device: cuda | background: 200 | fold: [1, 2, 3, 4, 5]
+
+=== Caso 3 - ResNet-50 + tabulare ===
+  Fold 1: PR-AUC 0.5477 (CSV 0.5447) | senza clinica 0.4835 | senza immagine 0.1929 | err proiezione 9.5e-07 | err efficienza 4.0e-15 | 13.8 s
+  Fold 2: PR-AUC 0.4791 (CSV 0.4699) | senza clinica 0.4292 | senza immagine 0.1944 | err proiezione 9.5e-07 | err efficienza 3.7e-15 | 10.8 s
+  Fold 3: PR-AUC 0.5267 (CSV 0.5218) | senza clinica 0.4887 | senza immagine 0.1184 | err proiezione 9.5e-07 | err efficienza 4.2e-15 | 10.8 s
+  Fold 4: PR-AUC 0.4617 (CSV 0.4570) | senza clinica 0.3936 | senza immagine 0.1841 | err proiezione 9.5e-07 | err efficienza 3.3e-15 | 11.0 s
+  Fold 5: PR-AUC 0.4542 (CSV 0.4447) | senza clinica 0.4295 | senza immagine 0.1041 | err proiezione 9.5e-07 | err efficienza 2.7e-15 | 12.8 s
+
+=== Caso 4 - MobileViT-S + tabulare ===
+  Fold 1: PR-AUC 0.5274 (CSV 0.5241) | senza clinica 0.4665 | senza immagine 0.1883 | err proiezione 9.5e-07 | err efficienza 3.4e-15 | 9.9 s
+  Fold 2: PR-AUC 0.5497 (CSV 0.5473) | senza clinica 0.5301 | senza immagine 0.1838 | err proiezione 9.5e-07 | err efficienza 2.2e-15 | 9.9 s
+  Fold 3: PR-AUC 0.4414 (CSV 0.4365) | senza clinica 0.4272 | senza immagine 0.1140 | err proiezione 9.5e-07 | err efficienza 2.7e-15 | 9.9 s
+  Fold 4: PR-AUC 0.4246 (CSV 0.4211) | senza clinica 0.3773 | senza immagine 0.2442 | err proiezione 9.5e-07 | err efficienza 2.5e-15 | 10.1 s
+  Fold 5: PR-AUC 0.4113 (CSV 0.4067) | senza clinica 0.4135 | senza immagine 0.0546 | err proiezione 9.5e-07 | err efficienza 3.6e-15 | 10.9 s
+
+Risultati in /mnt/sdb1/workspace/sofialapi/Tesi_Magistrale_LAPI/outputs/shap. Figure: python -m XAI_SHAP.shap_plots
+Figure:
+  salvata: figure/isic2024/shap/shap_importanza_variabili.png
+  salvata: figure/isic2024/shap/shap_beeswarm.png
+  salvata: figure/isic2024/shap/shap_dipendenza_numeriche.png
+  salvata: figure/isic2024/shap/shap_categoriali.png
+  salvata: figure/isic2024/shap/shap_modalita.png
+  salvata: figure/isic2024/shap/shap_waterfall_casi.png
+
+RIEPILOGO SHAP - ISIC 2024 (output spiegato: log-odds di malignità)
+
+== Caso 3 - ResNet-50 + tabulare ==
+  PR-AUC completo         0.4939 ± 0.0412   (CSV, epoca migliore: 0.4876)
+  PR-AUC senza clinica    0.4449 ± 0.0404
+  PR-AUC senza immagine   0.1588 ± 0.0439
+  |SHAP| medio immagine   1.1236   clinica 0.3331   (quota clinica 22.9%)
+  Errore max proiezione 9.5e-07 | efficienza 4.2e-15
+  Importanza (media |SHAP| ± ds tra fold):
+    Eccentricità           0.2116 ± 0.0489
+    Sede anatomica         0.1746 ± 0.0495
+    Età                    0.1061 ± 0.0165
+    Sesso                  0.0753 ± 0.0294
+    Asimmetria (2 assi)    0.0558 ± 0.0099
+    Area (mm²)             0.0553 ± 0.0116
+
+== Caso 4 - MobileViT-S + tabulare ==
+  PR-AUC completo         0.4709 ± 0.0632   (CSV, epoca migliore: 0.4671)
+  PR-AUC senza clinica    0.4429 ± 0.0583
+  PR-AUC senza immagine   0.1570 ± 0.0736
+  |SHAP| medio immagine   0.8308   clinica 0.2436   (quota clinica 22.7%)
+  Errore max proiezione 9.5e-07 | efficienza 3.6e-15
+  Importanza (media |SHAP| ± ds tra fold):
+    Eccentricità           0.1408 ± 0.0357
+    Sede anatomica         0.1232 ± 0.0221
+    Sesso                  0.1095 ± 0.0163
+    Età                    0.0663 ± 0.0173
+    Asimmetria (2 assi)    0.0624 ± 0.0219
+    Area (mm²)             0.0452 ± 0.0121
+
+Stabilità del ranking tra fold (Spearman medio / minimo):
+  ResNet-50 + tab.     0.840 / 0.714   variabile principale per fold: ['tbp_lv_eccentricity', 'tbp_lv_eccentricity', 'tbp_lv_eccentricity', 'tbp_lv_eccentricity', 'anatom_site_general']
+  MobileViT-S + tab.   0.777 / 0.600   variabile principale per fold: ['anatom_site_general', 'tbp_lv_eccentricity', 'tbp_lv_eccentricity', 'anatom_site_general', 'tbp_lv_eccentricity']
+
+Casi nei waterfall: {'vero_positivo': 'ISIC_4676617', 'falso_negativo': 'ISIC_8521796', 'falso_positivo': 'ISIC_4894407'}
+fine: mar 6 ott 2026, 05:59:46, CEST
