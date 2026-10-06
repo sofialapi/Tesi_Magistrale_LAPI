@@ -1,0 +1,19 @@
+{
+ "sezioni": {
+  "sintesi": "Probabilità finale 0.935, sicurezza alta. I dati clinici hanno rafforzato la stima basata solo sull’immagine.",
+  "immagine": "La stima con la sola immagine è 0.813 rispetto alla lesione di riferimento 0.025. L’attenzione cade principalmente sulla lesione.",
+  "dati_clinici": "Area della lesione 141.1 mm² (diametro 13.4 mm) spinge verso malignità. Età 50 anni spinge verso malignità. Sede anatomica arto superiore spinge verso malignità. Allungamento della forma 0.38 spinge verso malignità. Gli altri dati hanno effetto trascurabile.",
+  "avvertenze": []
+ },
+ "meta": {
+  "explainer": "llm",
+  "modello": "openai/gpt-oss-20b",
+  "prompt_version": "shap-v2",
+  "reasoning_effort": "medium",
+  "temperature": 0.3,
+  "response_format": "json_schema",
+  "latenza_s": 1.46,
+  "cache": false,
+  "token_totali": 2286
+ }
+}

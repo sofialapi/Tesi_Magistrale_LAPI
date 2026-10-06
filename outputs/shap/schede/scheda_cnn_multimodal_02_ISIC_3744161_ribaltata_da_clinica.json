@@ -104,23 +104,23 @@
  ],
  "spiegazione": {
   "sezioni": {
-   "sintesi": "Il modello ha stimato una probabilità di 0,708, classificando la lesione come maligna. La sicurezza è moderata. I dati clinici hanno ribaltato l’esito rispetto alla sola immagine.",
-   "immagine": "La stima basata solo sull’immagine era 0,394, inferiore alla soglia di 0,5. L’attenzione del modello cade principalmente sulla lesione, con il 76% dell’area focalizzata.",
-   "dati_clinici": "Il modello ha dato forte peso all’area della lesione (117,3 mm², diametro 12,2 mm), spingendola verso malignità. L’età (70 anni) ha avuto un effetto lieve, anch’essa verso malignità. Gli altri parametri (eccentricità, sede, asimmetria, sesso) hanno avuto un impatto trascurabile.",
+   "sintesi": "Probabilità finale 0.708, sicurezza moderata. I dati clinici hanno ribaltato la stima basata solo sull'immagine.",
+   "immagine": "La stima con la sola immagine era 0.394 rispetto alla lesione di riferimento 0.055. L'attenzione cade principalmente sulla lesione (76%).",
+   "dati_clinici": "Area della lesione 117.3 mm² (diametro equivalente 12.2 mm) spinge verso malignità con forte intensità. Età 70 anni spinge verso malignità con lieve intensità. Gli altri dati (eccentricità, sede anatomica, asimmetria, sesso) hanno effetto trascurabile.",
    "avvertenze": [
-    "Con la sola immagine la lesione sarebbe stata classificata come benigna: l’esito dipende dai dati clinici, di cui va verificata la correttezza."
+    "Con la sola immagine la lesione sarebbe stata classificata come benigna: l'esito dipende dai dati clinici, di cui va verificata la correttezza."
    ]
   },
   "meta": {
    "explainer": "llm",
    "modello": "openai/gpt-oss-20b",
-   "prompt_version": "shap-v1",
+   "prompt_version": "shap-v2",
    "reasoning_effort": "medium",
    "temperature": 0.3,
    "response_format": "json_schema",
-   "latenza_s": 2.63,
+   "latenza_s": 1.39,
    "cache": false,
-   "token_totali": 3512
+   "token_totali": 2392
   }
  },
  "avvertenze_aggiunte": [],
@@ -131,15 +131,16 @@
   "gergo_tecnico": [],
   "avvertenze_mancanti": [],
   "parole_per_sezione": {
-   "sintesi": 29,
-   "immagine": 29,
-   "dati_clinici": 45
+   "sintesi": 17,
+   "immagine": 23,
+   "dati_clinici": 37
   },
   "limiti_superati": [],
   "troppi_numeri": [
    "immagine",
    "dati_clinici"
   ],
+  "virgola_decimale": false,
   "stile_ok": false,
   "superata": true
  },

@@ -17,7 +17,7 @@ import numpy as np
 from XAI_NL.nl_verify import _IGNORE, _NUM, _collect_numbers, _matches
 
 LLM_MODEL = "openai/gpt-oss-20b"
-PROMPT_VERSION = "shap-v1"  # cambiala quando modifichi il prompt: invalida la cache
+PROMPT_VERSION = "shap-v2"  # cambiala quando modifichi il prompt: invalida la cache
 
 THRESHOLD = 0.5
 # Intensita' di un contributo SHAP (|phi| in log-odds). Riferimento: la media di
@@ -244,9 +244,9 @@ Regole obbligatorie:
    cade prevalentemente sulla lesione, senza descrivere dettagli dell'immagine.
 5. Riporta tutte le avvertenze calcolate nella sezione "avvertenze", in
    linguaggio chiaro. Se non ce ne sono, restituisci una lista vuota.
-6. Al massimo due valori numerici per sezione, copiati esattamente come compaiono
-   nei descrittori: probabilita' come numeri decimali (es. 0.949). Privilegia le
-   descrizioni verbali.
+6. Al massimo due valori numerici per sezione (uno solo nella sintesi), copiati
+   esattamente come compaiono nei descrittori, con il punto come separatore
+   decimale (0.949, mai 0,949). Privilegia le descrizioni verbali.
 7. Scrivi in italiano, per un medico che non conosce il machine learning: evita
    termini come SHAP, Shapley, log-odds, logit, embedding, feature. Frasi brevi.
    Limiti di parole: sintesi {WORD_LIMITS['sintesi']}, immagine {WORD_LIMITS['immagine']},
@@ -255,12 +255,14 @@ Regole obbligatorie:
 9. Se un valore e' "non valutabile", dillo esplicitamente.
 
 Contenuto delle sezioni:
-- sintesi: esito, grado di sicurezza e se i dati clinici hanno rafforzato,
-  attenuato o ribaltato la stima basata sulla sola immagine.
+- sintesi: esito con la sola probabilita' finale, grado di sicurezza e se i dati
+  clinici hanno rafforzato, attenuato o ribaltato la stima basata sulla sola
+  immagine.
 - immagine: cosa indica la stima basata sulla sola immagine rispetto alla lesione
   di riferimento e se l'attenzione cade sulla lesione.
 - dati_clinici: i dati con peso forte o moderato, in ordine, con valore e
-  direzione; cita brevemente quelli lievi solo se utile.
+  direzione, poi quelli lievi in una sola frase. Non elencare i dati con peso
+  trascurabile: al massimo dì che gli altri hanno avuto un effetto trascurabile.
 - avvertenze: elenco di frasi brevi."""
 
 RESPONSE_SCHEMA = {
@@ -456,11 +458,14 @@ def verify(sections, f, rule_warns):
                if _words(a) > WORD_LIMITS["avvertenza"] * 1.2]
   per_sez = {k: len(_NUM.findall(_IGNORE.sub(" ", sections[k])))
              for k in sections if k != "avvertenze"}
-  troppi = [k for k, n in per_sez.items() if n > MAX_NUMBERS_PER_SECTION]
+  troppi = [k for k, n in per_sez.items()
+            if n > (1 if k == "sintesi" else MAX_NUMBERS_PER_SECTION)]
+  virgola = bool(re.search(r"\d,\d", full))
   return {
       "numeri_citati": len(numeri), "numeri_non_verificati": non_verificati,
       "termini_vietati": vietati, "gergo_tecnico": gergo, "avvertenze_mancanti": mancanti,
       "parole_per_sezione": lunghezze, "limiti_superati": superati, "troppi_numeri": troppi,
-      "stile_ok": not (troppi or gergo or superati),
+      "virgola_decimale": virgola,
+      "stile_ok": not (troppi or gergo or superati or virgola),
       "superata": not (non_verificati or vietati or mancanti),
   }

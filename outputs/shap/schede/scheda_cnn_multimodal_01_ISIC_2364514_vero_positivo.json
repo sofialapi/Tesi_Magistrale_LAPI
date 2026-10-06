@@ -97,41 +97,40 @@
  "avvertenze_regole": [],
  "spiegazione": {
   "sezioni": {
-   "sintesi": "Il modello ha stimato una probabilità di malignità di 0.935, rispetto a 0.813 con solo l’immagine e 0.025 per la lesione di riferimento. L’esito è maligna, sicurezza alta. I dati clinici hanno rafforzato la stima basata sulla sola immagine.",
-   "immagine": "La stima basata solo sull’immagine è 0.813, molto più alta della lesione di riferimento 0.025. L’attenzione del modello cade principalmente sulla lesione, con il 93 % della mappa di attenzione concentrata su di essa.",
-   "dati_clinici": "Area della lesione: 141.1 mm² (diametro equivalente 13.4 mm), spinge verso malignità con peso forte. Età: 50 anni, spinge verso malignità con peso lieve. Sede anatomica: arto superiore, spinge verso malignità con peso lieve. Allungamento della forma: 0.38, spinge verso malignità con peso lieve. Asimmetria: 0.20, spinge verso benignità con peso trascurabile. Sesso: maschio, spinge verso malignità con peso trascurabile.",
+   "sintesi": "Probabilità finale 0.935, sicurezza alta. I dati clinici hanno rafforzato la stima basata solo sull’immagine.",
+   "immagine": "La stima con la sola immagine è 0.813 rispetto alla lesione di riferimento 0.025. L’attenzione cade principalmente sulla lesione.",
+   "dati_clinici": "Area della lesione 141.1 mm² (diametro 13.4 mm) spinge verso malignità. Età 50 anni spinge verso malignità. Sede anatomica arto superiore spinge verso malignità. Allungamento della forma 0.38 spinge verso malignità. Gli altri dati hanno effetto trascurabile.",
    "avvertenze": []
   },
   "meta": {
    "explainer": "llm",
    "modello": "openai/gpt-oss-20b",
-   "prompt_version": "shap-v1",
+   "prompt_version": "shap-v2",
    "reasoning_effort": "medium",
    "temperature": 0.3,
    "response_format": "json_schema",
-   "latenza_s": 2.05,
+   "latenza_s": 1.46,
    "cache": false,
-   "token_totali": 2793
+   "token_totali": 2286
   }
  },
  "avvertenze_aggiunte": [],
  "verifica": {
-  "numeri_citati": 11,
+  "numeri_citati": 7,
   "numeri_non_verificati": [],
   "termini_vietati": [],
   "gergo_tecnico": [],
   "avvertenze_mancanti": [],
   "parole_per_sezione": {
-   "sintesi": 44,
-   "immagine": 37,
-   "dati_clinici": 64
+   "sintesi": 17,
+   "immagine": 22,
+   "dati_clinici": 40
   },
   "limiti_superati": [],
   "troppi_numeri": [
-   "sintesi",
-   "immagine",
    "dati_clinici"
   ],
+  "virgola_decimale": false,
   "stile_ok": false,
   "superata": true
  },
