@@ -1,0 +1,147 @@
+{
+ "isic_id": "ISIC_3744161",
+ "tipologia": "ribaltata_da_clinica",
+ "verita": "Maligna",
+ "caso": "cnn_multimodal",
+ "fold": 2,
+ "logit_modello": 0.8856586813926697,
+ "logit_csv": 0.8856619000434875,
+ "target_layer": "visual_backbone.model.layer4[-1].conv3",
+ "descrittori": {
+  "modello": "Caso 3: ResNet-50 + dati clinici",
+  "soglia_decisionale": 0.5,
+  "probabilita": {
+   "riferimento": 0.055,
+   "solo_immagine": 0.394,
+   "immagine_e_dati_clinici": 0.708
+  },
+  "esito": "maligna",
+  "esito_solo_immagine": "benigna",
+  "sicurezza": "moderata",
+  "ruolo_dati_clinici": "ribaltano l'esito",
+  "fattori_clinici": [
+   {
+    "codice": "tbp_lv_areaMM2",
+    "variabile": "Area della lesione",
+    "nome_breve": "Area",
+    "valore": "117.3 mm² (diametro equivalente 12.2 mm)",
+    "valore_breve": "117.3 mm² (Ø 12.2 mm)",
+    "dato_mancante": false,
+    "effetto": "verso malignità",
+    "intensita": "forte",
+    "phi": 1.172
+   },
+   {
+    "codice": "age_approx",
+    "variabile": "Età",
+    "nome_breve": "Età",
+    "valore": "70 anni",
+    "valore_breve": "70 anni",
+    "dato_mancante": false,
+    "effetto": "verso malignità",
+    "intensita": "lieve",
+    "phi": 0.116
+   },
+   {
+    "codice": "tbp_lv_eccentricity",
+    "variabile": "Allungamento della forma (eccentricità)",
+    "nome_breve": "Allungamento",
+    "valore": "0.85 (forma allungata)",
+    "valore_breve": "0.85",
+    "dato_mancante": false,
+    "effetto": "verso benignità",
+    "intensita": "trascurabile",
+    "phi": -0.041
+   },
+   {
+    "codice": "anatom_site_general",
+    "variabile": "Sede anatomica",
+    "nome_breve": "Sede",
+    "valore": "tronco anteriore",
+    "valore_breve": "tronco anteriore",
+    "dato_mancante": false,
+    "effetto": "verso malignità",
+    "intensita": "trascurabile",
+    "phi": 0.04
+   },
+   {
+    "codice": "tbp_lv_symm_2axis",
+    "variabile": "Asimmetria della forma",
+    "nome_breve": "Asimmetria",
+    "valore": "0.31 (media)",
+    "valore_breve": "0.31",
+    "dato_mancante": false,
+    "effetto": "verso malignità",
+    "intensita": "trascurabile",
+    "phi": 0.031
+   },
+   {
+    "codice": "sex",
+    "variabile": "Sesso",
+    "nome_breve": "Sesso",
+    "valore": "maschio",
+    "valore_breve": "maschio",
+    "dato_mancante": false,
+    "effetto": "verso benignità",
+    "intensita": "trascurabile",
+    "phi": -0.003
+   }
+  ],
+  "mappa_immagine": {
+   "quota_lesione_pct": 76,
+   "segmentazione_affidabile": true
+  },
+  "val_area": 117.3203,
+  "avvertenze_calcolate": [
+   "Con la sola immagine la lesione sarebbe stata classificata come benigna: l'esito dipende dai dati clinici, di cui va verificata la correttezza."
+  ]
+ },
+ "avvertenze_regole": [
+  {
+   "codice": "DECISIONE_DA_CLINICA",
+   "testo": "Con la sola immagine la lesione sarebbe stata classificata come benigna: l'esito dipende dai dati clinici, di cui va verificata la correttezza."
+  }
+ ],
+ "spiegazione": {
+  "sezioni": {
+   "sintesi": "Il modello ha stimato una probabilità di 0,708, classificando la lesione come maligna. La sicurezza è moderata. I dati clinici hanno ribaltato l’esito rispetto alla sola immagine.",
+   "immagine": "La stima basata solo sull’immagine era 0,394, inferiore alla soglia di 0,5. L’attenzione del modello cade principalmente sulla lesione, con il 76% dell’area focalizzata.",
+   "dati_clinici": "Il modello ha dato forte peso all’area della lesione (117,3 mm², diametro 12,2 mm), spingendola verso malignità. L’età (70 anni) ha avuto un effetto lieve, anch’essa verso malignità. Gli altri parametri (eccentricità, sede, asimmetria, sesso) hanno avuto un impatto trascurabile.",
+   "avvertenze": [
+    "Con la sola immagine la lesione sarebbe stata classificata come benigna: l’esito dipende dai dati clinici, di cui va verificata la correttezza."
+   ]
+  },
+  "meta": {
+   "explainer": "llm",
+   "modello": "openai/gpt-oss-20b",
+   "prompt_version": "shap-v1",
+   "reasoning_effort": "medium",
+   "temperature": 0.3,
+   "response_format": "json_schema",
+   "latenza_s": 2.63,
+   "cache": false,
+   "token_totali": 3512
+  }
+ },
+ "avvertenze_aggiunte": [],
+ "verifica": {
+  "numeri_citati": 7,
+  "numeri_non_verificati": [],
+  "termini_vietati": [],
+  "gergo_tecnico": [],
+  "avvertenze_mancanti": [],
+  "parole_per_sezione": {
+   "sintesi": 29,
+   "immagine": 29,
+   "dati_clinici": 45
+  },
+  "limiti_superati": [],
+  "troppi_numeri": [
+   "immagine",
+   "dati_clinici"
+  ],
+  "stile_ok": false,
+  "superata": true
+ },
+ "figura": "/mnt/sdb1/workspace/sofialapi/Tesi_Magistrale_LAPI/figure/isic2024/shap/schede/scheda_cnn_multimodal_02_ISIC_3744161_ribaltata_da_clinica.png"
+}

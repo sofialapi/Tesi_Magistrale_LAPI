@@ -1,0 +1,19 @@
+{
+ "sezioni": {
+  "sintesi": "Il modello ha stimato una probabilità di malignità di 0.935, rispetto a 0.813 con solo l’immagine e 0.025 per la lesione di riferimento. L’esito è maligna, sicurezza alta. I dati clinici hanno rafforzato la stima basata sulla sola immagine.",
+  "immagine": "La stima basata solo sull’immagine è 0.813, molto più alta della lesione di riferimento 0.025. L’attenzione del modello cade principalmente sulla lesione, con il 93 % della mappa di attenzione concentrata su di essa.",
+  "dati_clinici": "Area della lesione: 141.1 mm² (diametro equivalente 13.4 mm), spinge verso malignità con peso forte. Età: 50 anni, spinge verso malignità con peso lieve. Sede anatomica: arto superiore, spinge verso malignità con peso lieve. Allungamento della forma: 0.38, spinge verso malignità con peso lieve. Asimmetria: 0.20, spinge verso benignità con peso trascurabile. Sesso: maschio, spinge verso malignità con peso trascurabile.",
+  "avvertenze": []
+ },
+ "meta": {
+  "explainer": "llm",
+  "modello": "openai/gpt-oss-20b",
+  "prompt_version": "shap-v1",
+  "reasoning_effort": "medium",
+  "temperature": 0.3,
+  "response_format": "json_schema",
+  "latenza_s": 2.05,
+  "cache": false,
+  "token_totali": 2793
+ }
+}

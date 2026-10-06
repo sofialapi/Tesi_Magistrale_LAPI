@@ -1,0 +1,21 @@
+{
+ "sezioni": {
+  "sintesi": "Il modello ha stimato una probabilità di 0,708, classificando la lesione come maligna. La sicurezza è moderata. I dati clinici hanno ribaltato l’esito rispetto alla sola immagine.",
+  "immagine": "La stima basata solo sull’immagine era 0,394, inferiore alla soglia di 0,5. L’attenzione del modello cade principalmente sulla lesione, con il 76% dell’area focalizzata.",
+  "dati_clinici": "Il modello ha dato forte peso all’area della lesione (117,3 mm², diametro 12,2 mm), spingendola verso malignità. L’età (70 anni) ha avuto un effetto lieve, anch’essa verso malignità. Gli altri parametri (eccentricità, sede, asimmetria, sesso) hanno avuto un impatto trascurabile.",
+  "avvertenze": [
+   "Con la sola immagine la lesione sarebbe stata classificata come benigna: l’esito dipende dai dati clinici, di cui va verificata la correttezza."
+  ]
+ },
+ "meta": {
+  "explainer": "llm",
+  "modello": "openai/gpt-oss-20b",
+  "prompt_version": "shap-v1",
+  "reasoning_effort": "medium",
+  "temperature": 0.3,
+  "response_format": "json_schema",
+  "latenza_s": 2.63,
+  "cache": false,
+  "token_totali": 3512
+ }
+}

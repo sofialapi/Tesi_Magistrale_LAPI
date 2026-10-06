@@ -1,0 +1,3 @@
+isic_id,tipologia,verita,fold,p_finale,p_solo_immagine,ruolo_dati_clinici,quota_attenzione_lesione_pct,avvertenze,explainer,verifica_superata,numeri_non_verificati,avvertenze_mancanti,figura
+ISIC_2364514,vero_positivo,Maligna,1,0.935,0.813,rafforzano l'esito,93,,llm,True,,,/mnt/sdb1/workspace/sofialapi/Tesi_Magistrale_LAPI/figure/isic2024/shap/schede/scheda_cnn_multimodal_01_ISIC_2364514_vero_positivo.png
+ISIC_3744161,ribaltata_da_clinica,Maligna,2,0.708,0.394,ribaltano l'esito,76,DECISIONE_DA_CLINICA,llm,True,,,/mnt/sdb1/workspace/sofialapi/Tesi_Magistrale_LAPI/figure/isic2024/shap/schede/scheda_cnn_multimodal_02_ISIC_3744161_ribaltata_da_clinica.png

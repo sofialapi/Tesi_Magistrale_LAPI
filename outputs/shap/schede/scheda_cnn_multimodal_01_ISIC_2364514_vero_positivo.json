@@ -1,0 +1,139 @@
+{
+ "isic_id": "ISIC_2364514",
+ "tipologia": "vero_positivo",
+ "verita": "Maligna",
+ "caso": "cnn_multimodal",
+ "fold": 1,
+ "logit_modello": 2.6623501777648926,
+ "logit_csv": 2.662350416183472,
+ "target_layer": "visual_backbone.model.layer4[-1].conv3",
+ "descrittori": {
+  "modello": "Caso 3: ResNet-50 + dati clinici",
+  "soglia_decisionale": 0.5,
+  "probabilita": {
+   "riferimento": 0.025,
+   "solo_immagine": 0.813,
+   "immagine_e_dati_clinici": 0.935
+  },
+  "esito": "maligna",
+  "esito_solo_immagine": "maligna",
+  "sicurezza": "alta",
+  "ruolo_dati_clinici": "rafforzano l'esito",
+  "fattori_clinici": [
+   {
+    "codice": "tbp_lv_areaMM2",
+    "variabile": "Area della lesione",
+    "nome_breve": "Area",
+    "valore": "141.1 mm² (diametro equivalente 13.4 mm)",
+    "valore_breve": "141.1 mm² (Ø 13.4 mm)",
+    "dato_mancante": false,
+    "effetto": "verso malignità",
+    "intensita": "forte",
+    "phi": 0.983
+   },
+   {
+    "codice": "age_approx",
+    "variabile": "Età",
+    "nome_breve": "Età",
+    "valore": "50 anni",
+    "valore_breve": "50 anni",
+    "dato_mancante": false,
+    "effetto": "verso malignità",
+    "intensita": "lieve",
+    "phi": 0.103
+   },
+   {
+    "codice": "anatom_site_general",
+    "variabile": "Sede anatomica",
+    "nome_breve": "Sede",
+    "valore": "arto superiore",
+    "valore_breve": "arto superiore",
+    "dato_mancante": false,
+    "effetto": "verso malignità",
+    "intensita": "lieve",
+    "phi": 0.063
+   },
+   {
+    "codice": "tbp_lv_eccentricity",
+    "variabile": "Allungamento della forma (eccentricità)",
+    "nome_breve": "Allungamento",
+    "valore": "0.38 (forma quasi circolare)",
+    "valore_breve": "0.38",
+    "dato_mancante": false,
+    "effetto": "verso malignità",
+    "intensita": "lieve",
+    "phi": 0.051
+   },
+   {
+    "codice": "tbp_lv_symm_2axis",
+    "variabile": "Asimmetria della forma",
+    "nome_breve": "Asimmetria",
+    "valore": "0.20 (bassa)",
+    "valore_breve": "0.20",
+    "dato_mancante": false,
+    "effetto": "verso benignità",
+    "intensita": "trascurabile",
+    "phi": -0.01
+   },
+   {
+    "codice": "sex",
+    "variabile": "Sesso",
+    "nome_breve": "Sesso",
+    "valore": "maschio",
+    "valore_breve": "maschio",
+    "dato_mancante": false,
+    "effetto": "verso malignità",
+    "intensita": "trascurabile",
+    "phi": 0.003
+   }
+  ],
+  "mappa_immagine": {
+   "quota_lesione_pct": 93,
+   "segmentazione_affidabile": true
+  },
+  "val_area": 141.114655657722,
+  "avvertenze_calcolate": []
+ },
+ "avvertenze_regole": [],
+ "spiegazione": {
+  "sezioni": {
+   "sintesi": "Il modello ha stimato una probabilità di malignità di 0.935, rispetto a 0.813 con solo l’immagine e 0.025 per la lesione di riferimento. L’esito è maligna, sicurezza alta. I dati clinici hanno rafforzato la stima basata sulla sola immagine.",
+   "immagine": "La stima basata solo sull’immagine è 0.813, molto più alta della lesione di riferimento 0.025. L’attenzione del modello cade principalmente sulla lesione, con il 93 % della mappa di attenzione concentrata su di essa.",
+   "dati_clinici": "Area della lesione: 141.1 mm² (diametro equivalente 13.4 mm), spinge verso malignità con peso forte. Età: 50 anni, spinge verso malignità con peso lieve. Sede anatomica: arto superiore, spinge verso malignità con peso lieve. Allungamento della forma: 0.38, spinge verso malignità con peso lieve. Asimmetria: 0.20, spinge verso benignità con peso trascurabile. Sesso: maschio, spinge verso malignità con peso trascurabile.",
+   "avvertenze": []
+  },
+  "meta": {
+   "explainer": "llm",
+   "modello": "openai/gpt-oss-20b",
+   "prompt_version": "shap-v1",
+   "reasoning_effort": "medium",
+   "temperature": 0.3,
+   "response_format": "json_schema",
+   "latenza_s": 2.05,
+   "cache": false,
+   "token_totali": 2793
+  }
+ },
+ "avvertenze_aggiunte": [],
+ "verifica": {
+  "numeri_citati": 11,
+  "numeri_non_verificati": [],
+  "termini_vietati": [],
+  "gergo_tecnico": [],
+  "avvertenze_mancanti": [],
+  "parole_per_sezione": {
+   "sintesi": 44,
+   "immagine": 37,
+   "dati_clinici": 64
+  },
+  "limiti_superati": [],
+  "troppi_numeri": [
+   "sintesi",
+   "immagine",
+   "dati_clinici"
+  ],
+  "stile_ok": false,
+  "superata": true
+ },
+ "figura": "/mnt/sdb1/workspace/sofialapi/Tesi_Magistrale_LAPI/figure/isic2024/shap/schede/scheda_cnn_multimodal_01_ISIC_2364514_vero_positivo.png"
+}
