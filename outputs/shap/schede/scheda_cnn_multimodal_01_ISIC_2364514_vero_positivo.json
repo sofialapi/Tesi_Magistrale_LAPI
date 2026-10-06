@@ -110,7 +110,7 @@
    "temperature": 0.3,
    "response_format": "json_schema",
    "latenza_s": 1.46,
-   "cache": false,
+   "cache": true,
    "token_totali": 2286
   }
  },
