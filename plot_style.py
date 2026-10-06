@@ -121,18 +121,28 @@ def epoch_axis(ax, max_epoch):
     ax.set_xlabel("Epoca")
 
 
-def plot_curves(ax, df, col, models, band=True, band_alpha=0.15):
-    """Media sui fold per epoca, con banda +- deviazione standard."""
+def plot_curves(ax, df, col, models, band=True, band_alpha=0.15, min_folds=1):
+    """Media sui fold per epoca, con banda +- deviazione standard.
+
+    min_folds: mostra solo le epoche in cui almeno questo numero di fold e'
+    ancora in addestramento (con l'early stopping le ultime epoche sono
+    raggiunte da pochi fold e la loro media non e' rappresentativa).
+    """
+    xmax = 1
     for m in models:
         st = MODEL_STYLE[m]
-        g = df[df.Model == m].groupby("epoch")[col].agg(["mean", "std"])
+        g = df[df.Model == m].groupby("epoch")[col].agg(["mean", "std", "count"])
+        g = g[g["count"] >= min_folds]
+        if g.empty:
+            continue
         x = g.index.to_numpy()
         mu = g["mean"].to_numpy()
         sd = g["std"].fillna(0).to_numpy()
         ax.plot(x, mu, color=st["color"], ls=st["ls"], label=m)
         if band:
             ax.fill_between(x, mu - sd, mu + sd, color=st["color"], alpha=band_alpha, lw=0)
-    epoch_axis(ax, df["epoch"].max())
+        xmax = max(xmax, x.max())
+    epoch_axis(ax, xmax)
 
 
 def box_panel(ax, best, col, models, tick_labels=None, tick_fontsize=8, seed=0):
@@ -191,10 +201,19 @@ def model_handles(models, kind="line"):
         st = MODEL_STYLE[m]
         if kind == "line":
             hs.append(Line2D([], [], color=st["color"], ls=st["ls"], lw=1.6, label=m))
+        elif kind == "point":
+            hs.append(Line2D([], [], marker="o", ls="none", markersize=5,
+                             markerfacecolor=st["color"], markeredgecolor=INK,
+                             markeredgewidth=0.4, label=m))
         else:
             hs.append(Patch(facecolor=to_rgba(st["color"], st["alpha"]), edgecolor=st["color"],
                             hatch=st["hatch"], lw=0.8, label=m))
     return hs
+
+
+def mean_handle(label="Media sui 5 fold"):
+    return Line2D([], [], marker="D", ls="none", markersize=5, markerfacecolor="white",
+                  markeredgecolor=INK, markeredgewidth=1.0, label=label)
 
 
 def top_legend(fig, handles, ncol):

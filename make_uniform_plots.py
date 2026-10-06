@@ -17,6 +17,10 @@ import plot_style as ps
 OUT = "uniform_plots"
 METRICS3 = ["pr_auc", "recall", "mcc"]
 
+# Cap. 5: le curve per epoca sono mostrate solo dove almeno MIN_FOLDS_CAP5 fold
+# su 5 sono ancora in addestramento (early stopping).
+MIN_FOLDS_CAP5 = 3
+
 # Tabella 5.4: l'MCC non e' salvato nei CSV per epoca del Cap. 5, quindi nel
 # barchart viene preso da qui (senza barra d'errore). PR-AUC e Sensibilita'
 # vengono invece ricalcolate dai CSV e confrontate con questi valori.
@@ -112,8 +116,10 @@ def selezione_backbone():
         print(f" [{ds}]")
         ps.print_summary(best[ds], models, METRICS3)
 
-    # 1. Valori per fold, linee che collegano lo stesso fold
-    fig, axes = plt.subplots(2, 3, figsize=(ps.FULL_W, 4.6))
+    # 1. Valori per fold, linee che collegano lo stesso fold.
+    #    Metrica nel titolo (riga in alto), dataset come etichetta di riga,
+    #    modelli identificati dalla legenda (stesso ordine da sinistra a destra).
+    fig, axes = plt.subplots(2, 3, figsize=(ps.FULL_W, 4.3))
     for i, ds in enumerate(runs):
         sub = best[ds]
         for j, col in enumerate(METRICS3):
@@ -127,11 +133,15 @@ def selezione_backbone():
                            color=ps.MODEL_STYLE[m]["color"], edgecolor=ps.INK, lw=0.4, zorder=2)
                 ax.scatter(k, vals.mean(), marker="D", s=30, facecolor="white",
                            edgecolor=ps.INK, lw=1.0, zorder=3)
-            ax.set_xticks(range(len(models)), models, fontsize=7.5)
+            ax.set_xticks([])
             ax.set_xlim(-0.4, len(models) - 0.6)
-            ax.set_title(f"{ps.METRIC_LABELS[col]} – {ds}")
             ax.grid(axis="x", visible=False)
+            if i == 0:
+                ax.set_title(ps.METRIC_LABELS[col])
+            if j == 0:
+                ax.set_ylabel(ds, fontweight="bold")
     fig.tight_layout()
+    ps.top_legend(fig, ps.model_handles(models, kind="point") + [ps.mean_handle()], ncol=4)
     ps.save(fig, os.path.join(out_dir, "selezione_backbone_per_fold.png"))
 
     # 2. Loss VGG-16 vs ResNet-50
@@ -181,13 +191,19 @@ def cap5():
             line.append(f"{c} {b[c].mean():.4f} ± {b[c].std():.4f} (tab {TAB_CAP5[m][c]:.4f}){flag}")
         print(f"  {m:<32} | " + " | ".join(line) + f" | epoche per fold {b.epoch.tolist()}")
 
+    print(f"  Ultima epoca mostrata nelle curve (almeno {MIN_FOLDS_CAP5} fold attivi):")
+    for m in models:
+        n = df[df.Model == m].groupby("epoch")["fold"].nunique()
+        print(f"    {m:<32} epoca {int(n[n >= MIN_FOLDS_CAP5].index.max())}"
+              f" (ultima epoca raggiunta da un fold: {int(n.index.max())})")
+
     band_alpha = 0.10  # 4 curve: banda piu' leggera; band=False per toglierla
 
     # 1. Focal loss
     fig, axes = plt.subplots(1, 2, figsize=(ps.FULL_W, 2.5))
     for ax, (col, name) in zip(axes, [("train_loss", "Training loss"),
                                       ("val_loss", "Validation loss")]):
-        ps.plot_curves(ax, df, col, models, band_alpha=band_alpha)
+        ps.plot_curves(ax, df, col, models, band_alpha=band_alpha, min_folds=MIN_FOLDS_CAP5)
         ax.set_title(name)
         ax.set_ylabel("Focal Loss")
     fig.tight_layout()
@@ -197,7 +213,7 @@ def cap5():
     # 2. PR-AUC e Sensibilita' per epoca (MCC non disponibile nei CSV)
     fig, axes = plt.subplots(1, 2, figsize=(ps.FULL_W, 2.5))
     for ax, col in zip(axes, ["pr_auc", "recall"]):
-        ps.plot_curves(ax, df, col, models, band_alpha=band_alpha)
+        ps.plot_curves(ax, df, col, models, band_alpha=band_alpha, min_folds=MIN_FOLDS_CAP5)
         ax.set_title(ps.METRIC_LABELS[col])
     fig.tight_layout()
     ps.top_legend(fig, ps.model_handles(models), ncol=2)
