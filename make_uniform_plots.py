@@ -90,7 +90,7 @@ def two_model_set(files, out_dir, prefix, title, loss_label="BCE pesata"):
 
 
 # ---------------------------------------------------------------------------
-# Capitolo 4: scelta della baseline (VGG-16 vs ResNet-50, MobileViT-S come riferimento)
+# Capitolo 4: scelta della baseline (solo VGG-16 vs ResNet-50)
 # ---------------------------------------------------------------------------
 def selezione_backbone():
     print("\n=== Cap. 4 - Selezione backbone (Tab. 4.1) ===")
@@ -98,27 +98,34 @@ def selezione_backbone():
         "BCN20000": {
             "VGG-16": "outputs/vgg/metrics/metrics_vgg_bcn20000_cnn.csv",
             "ResNet-50": "outputs/metrics_bcn_cnn.csv",
-            "MobileViT-S": "outputs/metrics_bcn_hybrid.csv",
         },
         "HAM10000": {
             "VGG-16": "outputs/vgg/metrics/metrics_vgg_ham10000_cnn.csv",
             "ResNet-50": "outputs/metrics_ham10000_cnn.csv",
-            "MobileViT-S": "outputs/metrics_ham10000_hybrid.csv",
         },
     }
     if not all(_exists(f) for f in runs.values()):
         return
-    models = ["VGG-16", "ResNet-50", "MobileViT-S"]
+    models = ["VGG-16", "ResNet-50"]
     out_dir = os.path.join(OUT, "cap4", "VGG")
     hist = {ds: ps.load_runs(f) for ds, f in runs.items()}
     best = {ds: ps.best_per_fold(h, "max_pr_auc") for ds, h in hist.items()}
     for ds in runs:
         print(f" [{ds}]")
         ps.print_summary(best[ds], models, METRICS3)
+        # Confronto appaiato fold per fold (verifica delle frasi nel testo)
+        v = best[ds][best[ds].Model == "VGG-16"].set_index("fold")
+        r = best[ds][best[ds].Model == "ResNet-50"].set_index("fold")
+        for col in METRICS3:
+            d = r[col] - v.loc[r.index, col]
+            print(f"   ResNet-50 - VGG-16 {col:<7}: delta medio {d.mean():+.4f} | "
+                  f"ResNet migliore in {(d > 0).sum()}/{len(d)} fold | "
+                  f"VGG [{v[col].min():.3f}, {v[col].max():.3f}]  "
+                  f"ResNet [{r[col].min():.3f}, {r[col].max():.3f}]")
 
     # 1. Valori per fold, linee che collegano lo stesso fold.
     #    Metrica nel titolo (riga in alto), dataset come etichetta di riga,
-    #    modelli identificati dalla legenda (stesso ordine da sinistra a destra).
+    #    nome del modello sotto ciascuna colonna di punti.
     fig, axes = plt.subplots(2, 3, figsize=(ps.FULL_W, 4.3))
     for i, ds in enumerate(runs):
         sub = best[ds]
@@ -133,30 +140,30 @@ def selezione_backbone():
                            color=ps.MODEL_STYLE[m]["color"], edgecolor=ps.INK, lw=0.4, zorder=2)
                 ax.scatter(k, vals.mean(), marker="D", s=30, facecolor="white",
                            edgecolor=ps.INK, lw=1.0, zorder=3)
-            ax.set_xticks([])
-            ax.set_xlim(-0.4, len(models) - 0.6)
+            ax.set_xticks(range(len(models)))
+            ax.set_xticklabels(models if i == 1 else [])
+            ax.set_xlim(-0.5, len(models) - 0.5)
             ax.grid(axis="x", visible=False)
             if i == 0:
                 ax.set_title(ps.METRIC_LABELS[col])
             if j == 0:
                 ax.set_ylabel(ds, fontweight="bold")
     fig.tight_layout()
-    ps.top_legend(fig, ps.model_handles(models, kind="point") + [ps.mean_handle()], ncol=4)
+    ps.top_legend(fig, ps.model_handles(models, kind="point") + [ps.mean_handle()], ncol=3)
     ps.save(fig, os.path.join(out_dir, "selezione_backbone_per_fold.png"))
 
     # 2. Loss VGG-16 vs ResNet-50
-    cnn = ["VGG-16", "ResNet-50"]
     fig, axes = plt.subplots(2, 2, figsize=(ps.FULL_W, 4.4))
     for i, ds in enumerate(runs):
-        h = hist[ds][hist[ds].Model.isin(cnn)]
+        h = hist[ds]
         for j, (col, name) in enumerate([("train_loss", "Training loss"),
                                          ("val_loss", "Validation loss")]):
             ax = axes[i, j]
-            ps.plot_curves(ax, h, col, cnn)
+            ps.plot_curves(ax, h, col, models)
             ax.set_title(f"{name} – {ds}")
             ax.set_ylabel("BCE pesata")
     fig.tight_layout()
-    ps.top_legend(fig, ps.model_handles(cnn), ncol=2)
+    ps.top_legend(fig, ps.model_handles(models), ncol=2)
     ps.save(fig, os.path.join(out_dir, "selezione_backbone_loss.png"))
 
 
